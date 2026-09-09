@@ -1,9 +1,13 @@
 import type { CV } from "@/domain/cv/types";
 import { ContactLine, PageShell, Photo, SectionBody } from "./shared";
 
-/** Clean B/W layout — no accent rule under the name. */
-export function MinimalTemplate({ cv }: { cv: CV }) {
+/**
+ * Classic layout matching typical “ruled header” CVs:
+ * colored name + full-width hairline under the title, contact below the rule.
+ */
+export function ClassicTemplate({ cv }: { cv: CV }) {
   const { personal, sections, appearance } = cv;
+  const accent = appearance.nameColor || appearance.accentColor || "#3B7A8A";
   const contactBits = [
     personal.city,
     personal.email,
@@ -20,19 +24,18 @@ export function MinimalTemplate({ cv }: { cv: CV }) {
         <Photo src={personal.photoDataUrl} atsMode={appearance.atsMode} />
         <div className="min-w-0 flex-1">
           <h1
-            className="text-[22pt] font-semibold tracking-tight leading-tight"
-            style={{ color: appearance.nameColor || "#111" }}
+            className="text-[20pt] font-semibold tracking-tight leading-tight"
+            style={{ color: accent }}
           >
             {personal.fullName || "Your Name"}
           </h1>
           {personal.title && (
-            <div className="mt-0.5 text-neutral-600" style={{ color: appearance.titleColor }}>
+            <div className="mt-0.5 text-[11pt]" style={{ color: appearance.titleColor || "#525252" }}>
               {personal.title}
             </div>
           )}
-          <div className="mt-2">
-            <ContactLine bits={contactBits} />
-          </div>
+          <div className="mt-2.5 mb-2 h-px w-full" style={{ backgroundColor: accent }} />
+          <ContactLine bits={contactBits} />
         </div>
       </header>
 
@@ -45,8 +48,8 @@ export function MinimalTemplate({ cv }: { cv: CV }) {
         return (
           <section key={section.id} className="mb-5">
             <h2
-              className="text-[10.5px] font-semibold uppercase tracking-[0.14em] mb-2"
-              style={{ color: section.titleColor || "#111" }}
+              className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2"
+              style={{ color: section.titleColor || accent }}
             >
               {section.title}
             </h2>

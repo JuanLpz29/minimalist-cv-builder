@@ -1,89 +1,339 @@
-import {
-  type CV,
-  type Experience,
-  type Education,
-  type Project,
-  type Certification,
-  type SkillGroup,
-  SKILL_CATEGORIES,
-  DEFAULT_SECTION_ORDER,
+import type {
+  Appearance,
+  CV,
+  CVSection,
+  Locale,
+  LocaleBundle,
+  PersonalInfo,
+  SectionEntry,
+  SectionKind,
 } from "./types";
 
-const uid = () =>
+export const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
 
-export const newExperience = (): Experience => ({
+export const defaultColors = {
+  accent: "#111111",
+  name: "#111111",
+  title: "#404040",
+  sectionTitle: "#111111",
+  subtitle: "#525252",
+};
+
+export const newEntry = (): SectionEntry => ({
   id: uid(),
-  company: "",
-  role: "",
-  startDate: "",
-  endDate: "",
-  modality: "",
+  heading: "",
+  subheading: "",
+  meta: "",
+  body: "",
+});
+
+export const newSection = (
+  title = "Nueva sección",
+  kind: SectionKind = "text",
+  colors?: { title?: string; subtitle?: string },
+): CVSection => ({
+  id: uid(),
+  title,
+  kind,
+  titleColor: colors?.title ?? defaultColors.sectionTitle,
+  subtitleColor: colors?.subtitle ?? defaultColors.subtitle,
+  body: "",
+  entries: kind === "entries" ? [newEntry()] : [],
+});
+
+export const defaultAppearance = (): Appearance => ({
+  template: "minimal",
+  font: "Inter",
+  fontSize: 11,
+  spacing: 1.4,
+  accentColor: defaultColors.accent,
+  nameColor: defaultColors.name,
+  titleColor: defaultColors.title,
+  margin: 18,
+  atsMode: false,
+});
+
+export const emptyPersonal = (): PersonalInfo => ({
+  fullName: "",
+  title: "",
+  email: "",
+  phone: "",
   city: "",
-  description: "",
+  linkedin: "",
+  github: "",
+  website: "",
 });
 
-export const newEducation = (): Education => ({
-  id: uid(),
-  institution: "",
-  degree: "",
-  startDate: "",
-  endDate: "",
-});
+const STARTER: Record<Locale, { title: string; kind: SectionKind }[]> = {
+  es: [
+    { title: "Perfil profesional", kind: "text" },
+    { title: "Experiencia", kind: "entries" },
+    { title: "Educación", kind: "entries" },
+    { title: "Habilidades", kind: "tags" },
+  ],
+  en: [
+    { title: "Professional summary", kind: "text" },
+    { title: "Experience", kind: "entries" },
+    { title: "Education", kind: "entries" },
+    { title: "Skills", kind: "tags" },
+  ],
+};
 
-export const newProject = (): Project => ({
-  id: uid(),
-  name: "",
-  description: "",
-  technologies: "",
-  link: "",
-});
+export const defaultSections = (locale: Locale = "es"): CVSection[] =>
+  STARTER[locale].map((s) => newSection(s.title, s.kind));
 
-export const newCertification = (): Certification => ({
-  id: uid(),
-  name: "",
-  issuer: "",
-  date: "",
-});
-
-export const emptySkills = (): SkillGroup[] =>
-  SKILL_CATEGORIES.map((category) => ({ category, items: [] }));
-
-export const newCV = (title = "Untitled CV"): CV => {
+export const newCV = (title = "Untitled CV", locale: Locale = "es"): CV => {
   const now = Date.now();
   return {
     id: uid(),
     title,
     createdAt: now,
     updatedAt: now,
-    personal: {
-      fullName: "",
-      title: "",
-      email: "",
-      phone: "",
-      city: "",
-      linkedin: "",
-      github: "",
-      website: "",
-    },
-    summary: "",
-    experience: [],
-    education: [],
-    projects: [],
-    skills: emptySkills(),
-    certifications: [],
-    appearance: {
-      template: "minimal",
-      font: "Inter",
-      fontSize: 11,
-      spacing: 1.4,
-      accentColor: "#111111",
-      margin: 18,
-      sectionOrder: [...DEFAULT_SECTION_ORDER],
-    },
+    locale,
+    personal: emptyPersonal(),
+    sections: defaultSections(locale),
+    appearance: defaultAppearance(),
   };
 };
 
-export { uid };
+function cloneBundle(personal: PersonalInfo, sections: CVSection[]): LocaleBundle {
+  return {
+    personal: { ...personal },
+    sections: sections.map((s) => ({
+      ...s,
+      entries: s.entries.map((e) => ({ ...e })),
+    })),
+  };
+}
+
+/** Swap active locale. First time: copies current content into the other slot (manual edit, no AI). */
+export function switchLocale(cv: CV, next: Locale): CV {
+  if (cv.locale === next) return cv;
+  const current = cloneBundle(cv.personal, cv.sections);
+  if (cv.otherLocale) {
+    return {
+      ...cv,
+      locale: next,
+      personal: { ...cv.otherLocale.personal },
+      sections: cv.otherLocale.sections.map((s) => ({
+        ...s,
+        entries: s.entries.map((e) => ({ ...e })),
+      })),
+      otherLocale: current,
+    };
+  }
+  // First toggle: seed other language with same content + starter titles for that locale
+  const seeded = cloneBundle(cv.personal, cv.sections);
+  const titles = STARTER[next];
+  seeded.sections = seeded.sections.map((s, i) => ({
+    ...s,
+    title: titles[i]?.title ?? s.title,
+  }));
+  return {
+    ...cv,
+    locale: next,
+    personal: seeded.personal,
+    sections: seeded.sections,
+    otherLocale: current,
+  };
+}
+
+export function detectLocale(text: string): Locale {
+  const t = text.toLowerCase();
+  const esHits = (
+    t.match(
+      /perfil profesional|experiencia|habilidades|educaci[oó]n|antecedentes|resumen|idiomas/g,
+    ) ?? []
+  ).length;
+  const enHits = (
+    t.match(/professional summary|experience|skills|education|certifications|languages/g) ?? []
+  ).length;
+  return esHits >= enHits ? "es" : "en";
+}
+
+/** Lift localStorage v1 (fixed fields) → sections model. */
+export function migrateCV(raw: unknown): CV {
+  const r = raw as Record<string, unknown>;
+  if (r && Array.isArray(r.sections)) {
+    const cv = r as unknown as CV;
+    const template =
+      cv.appearance?.template === "classic" ? "classic" : "minimal";
+    return {
+      ...newCV(cv.title || "Untitled CV", cv.locale || "es"),
+      ...cv,
+      locale: cv.locale === "en" ? "en" : "es",
+      personal: { ...emptyPersonal(), ...cv.personal },
+      appearance: { ...defaultAppearance(), ...cv.appearance, template },
+      sections: (cv.sections ?? []).map((s) => ({
+        ...newSection(s.title || "Section", s.kind || "text"),
+        ...s,
+        entries: s.entries ?? [],
+        body: s.body ?? "",
+        titleColor: s.titleColor || defaultColors.sectionTitle,
+        subtitleColor: s.subtitleColor || defaultColors.subtitle,
+      })),
+    };
+  }
+
+  const legacy = r as {
+    id?: string;
+    title?: string;
+    createdAt?: number;
+    updatedAt?: number;
+    personal?: PersonalInfo;
+    summary?: string;
+    experience?: Array<{
+      id: string;
+      role?: string;
+      company?: string;
+      startDate?: string;
+      endDate?: string;
+      city?: string;
+      modality?: string;
+      description?: string;
+    }>;
+    education?: Array<{
+      id: string;
+      degree?: string;
+      institution?: string;
+      startDate?: string;
+      endDate?: string;
+    }>;
+    projects?: Array<{
+      id: string;
+      name?: string;
+      link?: string;
+      description?: string;
+      technologies?: string;
+    }>;
+    skills?: Array<{ category: string; items: string[] }>;
+    certifications?: Array<{ id: string; name?: string; issuer?: string; date?: string }>;
+    appearance?: Partial<Appearance> & {
+      sectionOrder?: string[];
+      sectionLabels?: Record<string, string>;
+      accentColor?: string;
+    };
+  };
+
+  const accent = legacy.appearance?.accentColor ?? defaultColors.accent;
+  const labels = legacy.appearance?.sectionLabels ?? {};
+  const order = legacy.appearance?.sectionOrder ?? [
+    "summary",
+    "experience",
+    "education",
+    "projects",
+    "skills",
+    "certifications",
+  ];
+
+  const sections: CVSection[] = [];
+  const push = (build: () => CVSection | null) => {
+    const s = build();
+    if (s) sections.push(s);
+  };
+
+  for (const key of order) {
+    if (key === "summary") {
+      push(() => {
+        if (!legacy.summary?.trim()) return null;
+        return {
+          ...newSection(labels.summary || "Summary", "text", { title: accent }),
+          body: legacy.summary,
+        };
+      });
+    } else if (key === "experience") {
+      push(() => {
+        if (!legacy.experience?.length) return null;
+        return {
+          ...newSection(labels.experience || "Experience", "entries", { title: accent }),
+          entries: legacy.experience.map((e) => ({
+            id: e.id || uid(),
+            heading: e.role || "",
+            subheading: [e.company, e.city, e.modality].filter(Boolean).join(" · "),
+            meta: [e.startDate, e.endDate].filter(Boolean).join(" — "),
+            body: e.description || "",
+          })),
+        };
+      });
+    } else if (key === "education") {
+      push(() => {
+        if (!legacy.education?.length) return null;
+        return {
+          ...newSection(labels.education || "Education", "entries", { title: accent }),
+          entries: legacy.education.map((e) => ({
+            id: e.id || uid(),
+            heading: e.degree || "",
+            subheading: e.institution || "",
+            meta: [e.startDate, e.endDate].filter(Boolean).join(" — "),
+            body: "",
+          })),
+        };
+      });
+    } else if (key === "projects") {
+      push(() => {
+        if (!legacy.projects?.length) return null;
+        return {
+          ...newSection(labels.projects || "Projects", "entries", { title: accent }),
+          entries: legacy.projects.map((p) => ({
+            id: p.id || uid(),
+            heading: p.name || "",
+            subheading: p.technologies || "",
+            meta: p.link || "",
+            body: p.description || "",
+          })),
+        };
+      });
+    } else if (key === "skills") {
+      push(() => {
+        const lines = (legacy.skills ?? [])
+          .filter((g) => g.items?.length)
+          .map((g) => `${g.category}: ${g.items.join(", ")}`);
+        if (!lines.length) return null;
+        return {
+          ...newSection(labels.skills || "Skills", "tags", { title: accent }),
+          body: lines.join("\n"),
+        };
+      });
+    } else if (key === "certifications") {
+      push(() => {
+        if (!legacy.certifications?.length) return null;
+        return {
+          ...newSection(labels.certifications || "Certifications", "entries", { title: accent }),
+          entries: legacy.certifications.map((c) => ({
+            id: c.id || uid(),
+            heading: c.name || "",
+            subheading: c.issuer || "",
+            meta: c.date || "",
+            body: "",
+          })),
+        };
+      });
+    }
+  }
+
+  const now = Date.now();
+  const blob = JSON.stringify(legacy);
+  return {
+    id: legacy.id || uid(),
+    title: legacy.title || "Untitled CV",
+    createdAt: legacy.createdAt || now,
+    updatedAt: legacy.updatedAt || now,
+    locale: detectLocale(blob),
+    personal: { ...emptyPersonal(), ...legacy.personal },
+    sections:
+      sections.length > 0
+        ? sections
+        : defaultSections(detectLocale(blob)),
+    appearance: {
+      ...defaultAppearance(),
+      ...legacy.appearance,
+      accentColor: accent,
+      nameColor: (legacy.appearance as Appearance | undefined)?.nameColor || accent,
+      titleColor: (legacy.appearance as Appearance | undefined)?.titleColor || defaultColors.title,
+      atsMode: Boolean((legacy.appearance as Appearance | undefined)?.atsMode),
+    },
+  };
+}

@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, Trash2, MoreHorizontal } from "lucide-react";
+import { Plus, FileText, Trash2, MoreHorizontal, Upload } from "lucide-react";
 import { localRepository } from "@/domain/cv/repository";
 import { newCV } from "@/domain/cv/defaults";
+import { importCvFromFile } from "@/domain/cv/import/fromFile";
 import type { CV } from "@/domain/cv/types";
 import {
   DropdownMenu,
@@ -11,11 +12,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({ component: Dashboard });
 
 function Dashboard() {
   const [cvs, setCVs] = useState<CV[]>([]);
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +37,23 @@ function Dashboard() {
     setCVs((prev) => prev.filter((c) => c.id !== id));
   };
 
+  const onImport = async (file: File | undefined) => {
+    if (!file) return;
+    setImporting(true);
+    try {
+      const cv = await importCvFromFile(file);
+      await localRepository.save(cv);
+      toast.success("CV importado — revisá los campos y ajustá lo que falte");
+      navigate({ to: "/cv/$id", params: { id: cv.id } });
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "No se pudo importar el archivo");
+    } finally {
+      setImporting(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-neutral-100">
@@ -46,28 +67,53 @@ function Dashboard() {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-14">
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-end justify-between mb-10 gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Your resumes</h1>
             <p className="text-sm text-neutral-500 mt-1">
-              Minimalist, ATS-friendly. Edit on the left, preview on the right.
+              Importá un PDF/DOCX, editá los campos y exportá de nuevo a PDF.
             </p>
           </div>
-          <Button onClick={create} className="h-9 gap-1.5">
-            <Plus className="h-4 w-4" />
-            New resume
-          </Button>
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              className="hidden"
+              onChange={(e) => onImport(e.target.files?.[0])}
+            />
+            <Button
+              variant="outline"
+              className="h-9 gap-1.5"
+              disabled={importing}
+              onClick={() => fileRef.current?.click()}
+            >
+              <Upload className="h-4 w-4" />
+              {importing ? "Importando…" : "Import PDF/DOCX"}
+            </Button>
+            <Button onClick={create} className="h-9 gap-1.5">
+              <Plus className="h-4 w-4" />
+              New resume
+            </Button>
+          </div>
         </div>
 
         {cvs.length === 0 ? (
-          <button
-            onClick={create}
-            className="w-full border border-dashed border-neutral-200 rounded-xl py-20 flex flex-col items-center justify-center text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 transition-colors"
-          >
+          <div className="w-full border border-dashed border-neutral-200 rounded-xl py-20 flex flex-col items-center justify-center text-neutral-500">
             <FileText className="h-6 w-6 mb-3" strokeWidth={1.5} />
-            <div className="text-sm font-medium">Create your first resume</div>
-            <div className="text-xs mt-1 text-neutral-400">Takes about 5 minutes</div>
-          </button>
+            <div className="text-sm font-medium">Todavía no hay resumes</div>
+            <div className="text-xs mt-1 text-neutral-400 mb-4">Importá tu CV o empezá en blanco</div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" disabled={importing} onClick={() => fileRef.current?.click()}>
+                <Upload className="h-3.5 w-3.5 mr-1.5" />
+                Import PDF/DOCX
+              </Button>
+              <Button size="sm" onClick={create}>
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                New resume
+              </Button>
+            </div>
+          </div>
         ) : (
           <ul className="divide-y divide-neutral-100 border-y border-neutral-100">
             {cvs.map((cv) => (

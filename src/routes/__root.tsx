@@ -46,16 +46,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Mitrilo CV — Minimal, AI-assisted resume builder" },
-      { name: "description", content: "Craft polished, ATS-ready resumes in a minimalist editor with AI assistance and pixel-perfect PDF export." },
+      { title: "Mitrilo CV — Minimalist resume builder" },
+      { name: "description", content: "Import PDF/DOCX, edit free-form sections, toggle ES/EN, export to PDF." },
       { property: "og:title", content: "Mitrilo CV" },
-      { property: "og:description", content: "Minimal, AI-assisted resume builder." },
+      { property: "og:description", content: "Minimalist resume builder." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/favicon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

@@ -1,6 +1,7 @@
 // Pure domain types. No React, no infra. Portable to any stack.
 
 export type ID = string;
+export type Locale = "es" | "en";
 
 export interface PersonalInfo {
   fullName: string;
@@ -11,82 +12,75 @@ export interface PersonalInfo {
   linkedin: string;
   github: string;
   website: string;
+  /** data URL; oculto si appearance.atsMode */
+  photoDataUrl?: string;
 }
 
-export interface Experience {
+export type SectionKind = "text" | "entries" | "tags";
+
+export interface SectionEntry {
   id: ID;
-  company: string;
-  role: string;
-  startDate: string;
-  endDate: string;
-  modality: string; // Remote, Hybrid, On-site
-  city: string;
-  description: string;
+  heading: string;
+  subheading: string;
+  meta: string;
+  body: string;
 }
 
-export interface Education {
+export interface CVSection {
   id: ID;
-  institution: string;
-  degree: string;
-  startDate: string;
-  endDate: string;
-}
-
-export interface Project {
-  id: ID;
-  name: string;
-  description: string;
-  technologies: string;
-  link: string;
-}
-
-export type SkillCategory =
-  | "Frontend"
-  | "Backend"
-  | "Cloud"
-  | "Databases"
-  | "DevOps"
-  | "Languages"
-  | "Soft Skills";
-
-export const SKILL_CATEGORIES: SkillCategory[] = [
-  "Frontend",
-  "Backend",
-  "Cloud",
-  "Databases",
-  "DevOps",
-  "Languages",
-  "Soft Skills",
-];
-
-export interface SkillGroup {
-  category: SkillCategory;
-  items: string[];
-}
-
-export interface Certification {
-  id: ID;
-  name: string;
-  issuer: string;
-  date: string;
+  title: string;
+  kind: SectionKind;
+  titleColor: string;
+  subtitleColor: string;
+  body: string;
+  entries: SectionEntry[];
+  imageDataUrl?: string;
 }
 
 export type FontFamily = "Inter" | "IBM Plex Sans" | "Source Sans 3" | "Lato";
 
 export const FONT_FAMILIES: FontFamily[] = ["Inter", "IBM Plex Sans", "Source Sans 3", "Lato"];
 
-export type TemplateId = "minimal" | "ats" | "elegant";
+export type TemplateId = "minimal" | "classic";
+
+export const TEMPLATE_OPTIONS: { id: TemplateId; label: string; hint: string }[] = [
+  { id: "minimal", label: "Minimal B/N", hint: "Limpio, sin raya bajo el nombre" },
+  { id: "classic", label: "Classic", hint: "Nombre + raya (estilo CV tipográfico)" },
+];
 
 export interface Appearance {
   template: TemplateId;
   font: FontFamily;
-  fontSize: number; // 10-14
-  spacing: number; // 0.8 - 1.4 line-height multiplier
-  accentColor: string; // hex
-  margin: number; // in mm
-  sectionOrder: SectionKey[];
+  fontSize: number;
+  spacing: number;
+  accentColor: string;
+  nameColor: string;
+  titleColor: string;
+  margin: number;
+  /** Oculta fotos/imágenes (ATS-friendly) */
+  atsMode: boolean;
 }
 
+/** Snapshot of the inactive language version */
+export interface LocaleBundle {
+  personal: PersonalInfo;
+  sections: CVSection[];
+}
+
+export interface CV {
+  id: ID;
+  title: string;
+  updatedAt: number;
+  createdAt: number;
+  locale: Locale;
+  personal: PersonalInfo;
+  sections: CVSection[];
+  /** Contenido del otro idioma (se crea la 1ª vez que cambiás el toggle) */
+  otherLocale?: LocaleBundle;
+  appearance: Appearance;
+}
+
+/** @deprecated solo para migrate() de localStorage viejo */
 export type SectionKey =
   | "summary"
   | "experience"
@@ -103,18 +97,3 @@ export const DEFAULT_SECTION_ORDER: SectionKey[] = [
   "skills",
   "certifications",
 ];
-
-export interface CV {
-  id: ID;
-  title: string; // e.g. "Software Engineer — 2025"
-  updatedAt: number;
-  createdAt: number;
-  personal: PersonalInfo;
-  summary: string;
-  experience: Experience[];
-  education: Education[];
-  projects: Project[];
-  skills: SkillGroup[];
-  certifications: Certification[];
-  appearance: Appearance;
-}

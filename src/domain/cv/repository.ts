@@ -2,6 +2,7 @@
 // Swap for a REST / Supabase / FastAPI adapter without touching the app.
 
 import type { CV, ID } from "./types";
+import { migrateCV } from "./defaults";
 
 export interface CVRepository {
   list(): Promise<CV[]>;
@@ -15,7 +16,12 @@ const KEY = "mitrilo.cvs.v1";
 const read = (): Record<string, CV> => {
   if (typeof window === "undefined") return {};
   try {
-    return JSON.parse(window.localStorage.getItem(KEY) ?? "{}") as Record<string, CV>;
+    const raw = JSON.parse(window.localStorage.getItem(KEY) ?? "{}") as Record<string, unknown>;
+    const out: Record<string, CV> = {};
+    for (const [id, value] of Object.entries(raw)) {
+      out[id] = migrateCV(value);
+    }
+    return out;
   } catch {
     return {};
   }
@@ -35,7 +41,7 @@ export const localRepository: CVRepository = {
   },
   async save(cv) {
     const all = read();
-    const next: CV = { ...cv, updatedAt: Date.now() };
+    const next: CV = { ...migrateCV(cv), updatedAt: Date.now() };
     all[cv.id] = next;
     write(all);
     return next;
