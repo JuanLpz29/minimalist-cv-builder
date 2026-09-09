@@ -36,6 +36,7 @@ export const newSection = (
   title = "Nueva sección",
   kind: SectionKind = "text",
   colors?: { title?: string; subtitle?: string },
+  bodyFormat: "bullets" | "text" = "text",
 ): CVSection => ({
   id: uid(),
   title,
@@ -43,6 +44,7 @@ export const newSection = (
   titleColor: colors?.title ?? defaultColors.sectionTitle,
   subtitleColor: colors?.subtitle ?? defaultColors.subtitle,
   body: "",
+  bodyFormat: kind === "text" ? bodyFormat : undefined,
   entries: kind === "entries" ? [newEntry()] : [],
 });
 
@@ -128,10 +130,10 @@ export const samplePersonal = (locale: Locale = "es"): PersonalInfo =>
 export const sampleSections = (locale: Locale = "es"): CVSection[] => {
   if (locale === "en") {
     return [
-      {
-        ...newSection("Professional summary", "text"),
-        body: "Product designer with 6+ years shipping B2B and consumer experiences. I turn fuzzy problems into clear interfaces, partner closely with eng and research, and care about measurable outcomes—not just pretty screens.",
-      },
+    {
+      ...newSection("Professional summary", "text", undefined, "text"),
+      body: "Product designer with 6+ years shipping B2B and consumer experiences. I turn fuzzy problems into clear interfaces, partner closely with eng and research, and care about measurable outcomes—not just pretty screens.",
+    },
       {
         ...newSection("Experience", "entries"),
         entries: [
@@ -162,7 +164,7 @@ export const sampleSections = (locale: Locale = "es"): CVSection[] => {
             subheading: "Universidad Ejemplo",
             meta: "2014 — 2018",
             body: "",
-            bodyFormat: "text",
+            bodyFormat: "bullets",
           },
         ],
       },
@@ -175,7 +177,7 @@ export const sampleSections = (locale: Locale = "es"): CVSection[] => {
 
   return [
     {
-      ...newSection("Perfil profesional", "text"),
+      ...newSection("Perfil profesional", "text", undefined, "text"),
       body: "Diseñador/a de producto con más de 6 años creando experiencias B2B y consumer. Transformo problemas ambiguos en interfaces claras, trabajo codo a codo con engineering e investigación, y me importa el impacto medible — no solo pantallas bonitas.",
     },
     {
@@ -208,7 +210,7 @@ export const sampleSections = (locale: Locale = "es"): CVSection[] => {
           subheading: "Universidad Ejemplo",
           meta: "2014 — 2018",
           body: "",
-          bodyFormat: "text",
+          bodyFormat: "bullets",
         },
       ],
     },
@@ -322,10 +324,20 @@ export function migrateCV(raw: unknown): CV {
       personal: { ...emptyPersonal(), ...cv.personal },
       appearance: { ...defaultAppearance(), ...cv.appearance, template },
       sections: (cv.sections ?? []).map((s) => ({
-        ...newSection(s.title || "Section", s.kind || "text"),
+        ...newSection(s.title || "Section", s.kind || "text", undefined, s.bodyFormat === "bullets" ? "bullets" : "text"),
         ...s,
-        entries: s.entries ?? [],
+        entries: (s.entries ?? []).map((e) => ({
+          ...newEntry(),
+          ...e,
+          bodyFormat: e.bodyFormat === "text" ? "text" : "bullets",
+        })),
         body: s.body ?? "",
+        bodyFormat:
+          s.kind === "text"
+            ? s.bodyFormat === "bullets"
+              ? "bullets"
+              : "text"
+            : s.bodyFormat,
         titleColor: s.titleColor || defaultColors.sectionTitle,
         subtitleColor: s.subtitleColor || defaultColors.subtitle,
       })),

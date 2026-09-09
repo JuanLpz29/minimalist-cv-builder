@@ -35,8 +35,9 @@ export interface CVSection {
   titleColor: string;
   subtitleColor: string;
   body: string;
+  /** Solo kind text: bullets = una línea por ítem; text = párrafo */
+  bodyFormat?: "bullets" | "text";
   entries: SectionEntry[];
-  imageDataUrl?: string;
 }
 
 export type FontFamily = "Inter" | "IBM Plex Sans" | "Source Sans 3" | "Lato";

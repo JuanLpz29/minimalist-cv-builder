@@ -41,9 +41,7 @@ export function ClassicTemplate({ cv }: { cv: CV }) {
 
       {sections.map((section) => {
         const empty =
-          section.kind === "entries"
-            ? section.entries.length === 0
-            : !section.body.trim() && !section.imageDataUrl;
+          section.kind === "entries" ? section.entries.length === 0 : !section.body.trim();
         if (empty) return null;
         return (
           <section key={section.id} className="mb-5">
@@ -53,7 +51,7 @@ export function ClassicTemplate({ cv }: { cv: CV }) {
             >
               {section.title}
             </h2>
-            <SectionBody section={section} atsMode={appearance.atsMode} />
+            <SectionBody section={section} />
           </section>
         );
       })}

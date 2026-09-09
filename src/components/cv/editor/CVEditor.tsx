@@ -90,6 +90,118 @@ function patchEntry(
   );
 }
 
+function stripBulletMarkers(body: string) {
+  return body
+    .split("\n")
+    .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** Editor de descripción con toggle Viñetas / Texto. */
+function BodyFormatEditor({
+  body,
+  bodyFormat,
+  onChange,
+  textPlaceholder = "Párrafo libre de descripción…",
+  bulletPlaceholder = "Logro o responsabilidad…",
+}: {
+  body: string;
+  bodyFormat: "bullets" | "text";
+  onChange: (next: { body?: string; bodyFormat?: "bullets" | "text" }) => void;
+  textPlaceholder?: string;
+  bulletPlaceholder?: string;
+}) {
+  const isText = bodyFormat === "text";
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">
+          Descripción
+        </Label>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs ${isText ? "text-neutral-400" : "text-foreground font-medium"}`}>
+            Viñetas
+          </span>
+          <Switch
+            checked={isText}
+            onCheckedChange={(toText) =>
+              onChange({
+                bodyFormat: toText ? "text" : "bullets",
+                body: stripBulletMarkers(body),
+              })
+            }
+          />
+          <span className={`text-xs ${isText ? "text-foreground font-medium" : "text-neutral-400"}`}>
+            Texto
+          </span>
+        </div>
+      </div>
+
+      {isText ? (
+        <Textarea
+          value={body}
+          onChange={(e) => onChange({ body: e.target.value })}
+          className={areaCls}
+          placeholder={textPlaceholder}
+        />
+      ) : (
+        <div className="space-y-1.5">
+          {(body === "" ? [""] : body.split("\n")).map((line, idx, arr) => (
+            <div key={idx} className="flex items-center gap-1.5">
+              <span className="text-neutral-400 text-sm shrink-0 w-3">•</span>
+              <Input
+                value={line.replace(/^[-•●▪◦*]+\s*/, "")}
+                className="h-9 bg-transparent border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-0 shadow-none text-sm"
+                placeholder={bulletPlaceholder}
+                onChange={(e) => {
+                  const lines = body === "" && arr.length === 1 ? [e.target.value] : body.split("\n");
+                  lines[idx] = e.target.value;
+                  onChange({ body: lines.join("\n"), bodyFormat: "bullets" });
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const lines = body === "" ? [""] : body.split("\n");
+                    lines.splice(idx + 1, 0, "");
+                    onChange({ body: lines.join("\n"), bodyFormat: "bullets" });
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 shrink-0 text-neutral-400"
+                disabled={arr.length <= 1 && !line.trim()}
+                onClick={() => {
+                  const lines = body.split("\n").filter((_, i) => i !== idx);
+                  onChange({ body: lines.length ? lines.join("\n") : "", bodyFormat: "bullets" });
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-7 text-xs gap-1"
+            onClick={() => {
+              const lines = body === "" ? [""] : body.split("\n");
+              lines.push("");
+              onChange({ body: lines.join("\n"), bodyFormat: "bullets" });
+            }}
+          >
+            <Plus className="h-3.5 w-3.5" /> Agregar viñeta
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function CVEditor({ cv, update }: Props) {
   const [dragId, setDragId] = useState<string | null>(null);
   const photoRef = useRef<HTMLInputElement>(null);
@@ -206,7 +318,12 @@ export function CVEditor({ cv, update }: Props) {
               size="sm"
               variant="ghost"
               className="h-8 gap-1 text-xs"
-              onClick={() => setSections([...cv.sections, newSection(cv.locale === "es" ? "Nueva sección" : "Nueva sección", "text")])}
+              onClick={() =>
+                setSections([
+                  ...cv.sections,
+                  newSection(cv.locale === "es" ? "Nueva sección" : "Nueva sección", "text", undefined, "bullets"),
+                ])
+              }
             >
               <Plus className="h-3.5 w-3.5" /> Texto
             </Button>
@@ -293,16 +410,20 @@ export function CVEditor({ cv, update }: Props) {
               </Button>
             </div>
 
-            {section.kind === "text" || section.kind === "tags" ? (
+            {section.kind === "tags" ? (
               <Textarea
                 value={section.body}
                 onChange={(e) => setSections(patchSection(cv.sections, section.id, { body: e.target.value }))}
                 className={areaCls}
-                placeholder={
-                  section.kind === "tags"
-                    ? "Un ítem por línea, o Categoría: a, b, c"
-                    : "Contenido de la sección…"
-                }
+                placeholder="Un ítem por línea, o Categoría: a, b, c"
+              />
+            ) : section.kind === "text" ? (
+              <BodyFormatEditor
+                body={section.body}
+                bodyFormat={section.bodyFormat === "bullets" ? "bullets" : "text"}
+                textPlaceholder="Contenido de la sección…"
+                bulletPlaceholder="Punto o logro…"
+                onChange={(patch) => setSections(patchSection(cv.sections, section.id, patch))}
               />
             ) : (
               <div className="space-y-3">
@@ -343,138 +464,13 @@ export function CVEditor({ cv, update }: Props) {
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between gap-3">
-                        <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">
-                          Descripción
-                        </Label>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`text-xs ${(entry.bodyFormat ?? "bullets") === "text" ? "text-neutral-400" : "text-foreground font-medium"}`}
-                          >
-                            Viñetas
-                          </span>
-                          <Switch
-                            checked={(entry.bodyFormat ?? "bullets") === "text"}
-                            onCheckedChange={(toText) =>
-                              setSections(
-                                patchEntry(cv.sections, section.id, entry.id, {
-                                  bodyFormat: toText ? "text" : "bullets",
-                                  // strip bullet markers when switching to text; keep lines
-                                  body: toText
-                                    ? entry.body
-                                        .split("\n")
-                                        .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
-                                        .filter(Boolean)
-                                        .join("\n")
-                                    : entry.body
-                                        .split("\n")
-                                        .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
-                                        .filter(Boolean)
-                                        .join("\n"),
-                                }),
-                              )
-                            }
-                          />
-                          <span
-                            className={`text-xs ${(entry.bodyFormat ?? "bullets") === "text" ? "text-foreground font-medium" : "text-neutral-400"}`}
-                          >
-                            Texto
-                          </span>
-                        </div>
-                      </div>
-
-                      {(entry.bodyFormat ?? "bullets") === "text" ? (
-                        <Textarea
-                          value={entry.body}
-                          onChange={(e) =>
-                            setSections(
-                              patchEntry(cv.sections, section.id, entry.id, { body: e.target.value }),
-                            )
-                          }
-                          className={areaCls}
-                          placeholder="Párrafo libre de descripción…"
-                        />
-                      ) : (
-                        <div className="space-y-1.5">
-                          {(entry.body.split("\n").length === 0 || entry.body === ""
-                            ? [""]
-                            : entry.body.split("\n")
-                          ).map((line, idx, arr) => (
-                            <div key={idx} className="flex items-center gap-1.5">
-                              <span className="text-neutral-400 text-sm shrink-0 w-3">•</span>
-                              <Input
-                                value={line.replace(/^[-•●▪◦*]+\s*/, "")}
-                                className="h-9 bg-transparent border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-0 shadow-none text-sm"
-                                placeholder="Logro o responsabilidad…"
-                                onChange={(e) => {
-                                  const lines =
-                                    entry.body === "" && arr.length === 1
-                                      ? [e.target.value]
-                                      : entry.body.split("\n");
-                                  lines[idx] = e.target.value;
-                                  setSections(
-                                    patchEntry(cv.sections, section.id, entry.id, {
-                                      body: lines.join("\n"),
-                                      bodyFormat: "bullets",
-                                    }),
-                                  );
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") {
-                                    e.preventDefault();
-                                    const lines = (entry.body === "" ? [""] : entry.body.split("\n"));
-                                    lines.splice(idx + 1, 0, "");
-                                    setSections(
-                                      patchEntry(cv.sections, section.id, entry.id, {
-                                        body: lines.join("\n"),
-                                        bodyFormat: "bullets",
-                                      }),
-                                    );
-                                  }
-                                }}
-                              />
-                              <Button
-                                type="button"
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 shrink-0 text-neutral-400"
-                                disabled={arr.length <= 1 && !line.trim()}
-                                onClick={() => {
-                                  const lines = entry.body.split("\n").filter((_, i) => i !== idx);
-                                  setSections(
-                                    patchEntry(cv.sections, section.id, entry.id, {
-                                      body: lines.length ? lines.join("\n") : "",
-                                      bodyFormat: "bullets",
-                                    }),
-                                  );
-                                }}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          ))}
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 text-xs gap-1"
-                            onClick={() => {
-                              const lines = entry.body === "" ? [""] : entry.body.split("\n");
-                              lines.push("");
-                              setSections(
-                                patchEntry(cv.sections, section.id, entry.id, {
-                                  body: lines.join("\n"),
-                                  bodyFormat: "bullets",
-                                }),
-                              );
-                            }}
-                          >
-                            <Plus className="h-3.5 w-3.5" /> Agregar viñeta
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                    <BodyFormatEditor
+                      body={entry.body}
+                      bodyFormat={entry.bodyFormat === "text" ? "text" : "bullets"}
+                      onChange={(patch) =>
+                        setSections(patchEntry(cv.sections, section.id, entry.id, patch))
+                      }
+                    />
                   </div>
                 ))}
                 <Button
@@ -494,30 +490,6 @@ export function CVEditor({ cv, update }: Props) {
               </div>
             )}
 
-            <div className="flex items-center gap-2 pt-1">
-              <Label className="text-[11px] text-neutral-500">Imagen de sección</Label>
-              <Input
-                type="file"
-                accept="image/*"
-                className="h-8 text-xs"
-                onChange={async (e) => {
-                  const f = e.target.files?.[0];
-                  if (!f) return;
-                  const dataUrl = await readImage(f);
-                  setSections(patchSection(cv.sections, section.id, { imageDataUrl: dataUrl }));
-                }}
-              />
-              {section.imageDataUrl && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 text-xs"
-                  onClick={() => setSections(patchSection(cv.sections, section.id, { imageDataUrl: undefined }))}
-                >
-                  Quitar
-                </Button>
-              )}
-            </div>
           </div>
         ))}
       </Group>
@@ -526,7 +498,7 @@ export function CVEditor({ cv, update }: Props) {
         <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 px-3 py-2.5 mb-2">
           <div>
             <div className="text-sm font-medium">Modo ATS</div>
-            <div className="text-xs text-neutral-500">Oculta fotos e imágenes al exportar / vista previa</div>
+            <div className="text-xs text-neutral-500">Oculta la foto de perfil al exportar / vista previa</div>
           </div>
           <Switch
             checked={cv.appearance.atsMode}

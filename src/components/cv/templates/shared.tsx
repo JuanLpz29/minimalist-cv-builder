@@ -1,14 +1,9 @@
 import type { CV, CVSection } from "@/domain/cv/types";
 
-export function SectionBody({ section, atsMode }: { section: CVSection; atsMode: boolean }) {
-  const showImg = Boolean(section.imageDataUrl && !atsMode);
-
+export function SectionBody({ section }: { section: CVSection }) {
   if (section.kind === "entries") {
     return (
       <div className="space-y-3.5">
-        {showImg && (
-          <img src={section.imageDataUrl} alt="" className="max-h-24 mb-2 rounded object-cover" />
-        )}
         {section.entries.map((e) => (
           <div key={e.id}>
             <div className="flex justify-between gap-4 items-baseline">
@@ -19,8 +14,8 @@ export function SectionBody({ section, atsMode }: { section: CVSection; atsMode:
                 {[e.heading, e.subheading, e.meta].filter(Boolean).join(" | ") || "—"}
               </div>
             </div>
-            {e.body && (
-              e.bodyFormat === "text" ? (
+            {e.body &&
+              (e.bodyFormat === "text" ? (
                 <div className="mt-1 whitespace-pre-wrap text-neutral-700">{e.body}</div>
               ) : (
                 <ul className="mt-1 space-y-0.5 text-neutral-700 list-none pl-0">
@@ -35,8 +30,7 @@ export function SectionBody({ section, atsMode }: { section: CVSection; atsMode:
                       </li>
                     ))}
                 </ul>
-              )
-            )}
+              ))}
           </div>
         ))}
       </div>
@@ -47,9 +41,6 @@ export function SectionBody({ section, atsMode }: { section: CVSection; atsMode:
     const lines = section.body.split("\n").map((l) => l.trim()).filter(Boolean);
     return (
       <div className="space-y-1.5">
-        {showImg && (
-          <img src={section.imageDataUrl} alt="" className="max-h-24 mb-2 rounded object-cover" />
-        )}
         {lines.map((line, i) => {
           const idx = line.indexOf(":");
           if (idx > 0 && idx < 40) {
@@ -74,10 +65,22 @@ export function SectionBody({ section, atsMode }: { section: CVSection; atsMode:
 
   return (
     <div>
-      {showImg && (
-        <img src={section.imageDataUrl} alt="" className="max-h-28 mb-2 rounded object-cover" />
+      {section.bodyFormat === "bullets" ? (
+        <ul className="space-y-0.5 text-neutral-700 list-none pl-0">
+          {section.body
+            .split("\n")
+            .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
+            .filter(Boolean)
+            .map((line, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="shrink-0 select-none">•</span>
+                <span className="min-w-0">{line}</span>
+              </li>
+            ))}
+        </ul>
+      ) : (
+        <p className="whitespace-pre-wrap text-neutral-700">{section.body}</p>
       )}
-      <p className="whitespace-pre-wrap text-neutral-700">{section.body}</p>
     </div>
   );
 }
