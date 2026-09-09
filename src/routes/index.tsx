@@ -38,7 +38,7 @@ function Dashboard() {
   }, []);
 
   const create = async (template: TemplateId) => {
-    const cv = newCV("Untitled CV", "es", template);
+    const cv = newCV("CV sin título", "es", template);
     await localRepository.save(cv);
     setCreateOpen(false);
     navigate({ to: "/cv/$id", params: { id: cv.id } });
@@ -54,7 +54,6 @@ function Dashboard() {
     setImporting(true);
     try {
       const cv = await importCvFromFile(file);
-      // Keep imported content; ask layout via quick toast defaults to classic-friendly if teal-ish later
       cv.appearance = appearanceForTemplate(cv.appearance.template ?? "minimal", cv.appearance);
       await localRepository.save(cv);
       toast.success("CV importado — revisá los campos y ajustá lo que falte");
@@ -74,26 +73,26 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-neutral-100">
-        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
+    <div className="min-h-dvh bg-white text-neutral-900">
+      <header className="border-b border-neutral-100 bg-white">
+        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <div className="h-5 w-5 rounded bg-foreground" />
+            <div className="h-5 w-5 rounded bg-neutral-900" />
             <span className="text-sm font-semibold tracking-tight">Mitrilo</span>
-            <span className="text-sm text-neutral-400">/ Resumes</span>
+            <span className="text-sm text-neutral-400">/ CVs</span>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-14">
-        <div className="flex items-end justify-between mb-10 gap-4 flex-wrap">
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-14">
+        <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Your resumes</h1>
-            <p className="text-sm text-neutral-500 mt-1">
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Tus currículums</h1>
+            <p className="mt-1 text-sm text-neutral-500">
               Importá un PDF/DOCX, editá los campos y exportá de nuevo a PDF.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               ref={fileRef}
               type="file"
@@ -103,68 +102,83 @@ function Dashboard() {
             />
             <Button
               variant="outline"
-              className="h-9 gap-1.5"
+              className="h-10 w-full gap-1.5 sm:h-9 sm:w-auto"
               disabled={importing}
               onClick={() => fileRef.current?.click()}
             >
               <Upload className="h-4 w-4" />
-              {importing ? "Importando…" : "Import PDF/DOCX"}
+              {importing ? "Importando…" : "Importar PDF/DOCX"}
             </Button>
-            <Button onClick={openCreate} className="h-9 gap-1.5">
+            <Button onClick={openCreate} className="h-10 w-full gap-1.5 sm:h-9 sm:w-auto">
               <Plus className="h-4 w-4" />
-              New resume
+              Nuevo CV
             </Button>
           </div>
         </div>
 
         {cvs.length === 0 ? (
-          <div className="w-full border border-dashed border-neutral-200 rounded-xl py-20 flex flex-col items-center justify-center text-neutral-500">
-            <FileText className="h-6 w-6 mb-3" strokeWidth={1.5} />
-            <div className="text-sm font-medium">Todavía no hay resumes</div>
-            <div className="text-xs mt-1 text-neutral-400 mb-4">Importá tu CV o empezá en blanco</div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={importing} onClick={() => fileRef.current?.click()}>
-                <Upload className="h-3.5 w-3.5 mr-1.5" />
-                Import PDF/DOCX
+          <div className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-neutral-200 bg-white py-16 text-neutral-500 sm:py-20">
+            <FileText className="mb-3 h-6 w-6" strokeWidth={1.5} />
+            <div className="text-sm font-medium text-neutral-700">Todavía no hay currículums</div>
+            <div className="mb-4 mt-1 px-4 text-center text-xs text-neutral-400">
+              Importá tu CV o empezá en blanco
+            </div>
+            <div className="flex w-full max-w-xs flex-col gap-2 sm:max-w-none sm:w-auto sm:flex-row">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+                disabled={importing}
+                onClick={() => fileRef.current?.click()}
+              >
+                <Upload className="mr-1.5 h-3.5 w-3.5" />
+                Importar PDF/DOCX
               </Button>
-              <Button size="sm" onClick={openCreate}>
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                New resume
+              <Button size="sm" className="w-full sm:w-auto" onClick={openCreate}>
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Nuevo CV
               </Button>
             </div>
           </div>
         ) : (
           <ul className="divide-y divide-neutral-100 border-y border-neutral-100">
             {cvs.map((cv) => (
-              <li key={cv.id} className="group flex items-center justify-between py-4">
+              <li key={cv.id} className="group flex items-center justify-between gap-2 py-4">
                 <Link
                   to="/cv/$id"
                   params={{ id: cv.id }}
-                  className="flex-1 flex items-center gap-4 min-w-0"
+                  className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4"
                 >
-                  <div className="h-10 w-8 rounded-sm border border-neutral-200 bg-white flex items-center justify-center">
-                    <div className="h-1 w-4 bg-neutral-300 rounded-full" />
+                  <div className="flex h-10 w-8 shrink-0 items-center justify-center rounded-sm border border-neutral-200 bg-white">
+                    <div className="h-1 w-4 rounded-full bg-neutral-300" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-sm font-medium truncate">
+                    <div className="truncate text-sm font-medium">
                       {cv.personal.fullName || cv.title}
                     </div>
-                    <div className="text-xs text-neutral-500 truncate">
-                      {cv.appearance.template === "classic" ? "Classic" : "Minimal"} ·{" "}
-                      {cv.personal.title || "No title"} · Edited{" "}
-                      {new Date(cv.updatedAt).toLocaleDateString()}
+                    <div className="truncate text-xs text-neutral-500">
+                      {cv.appearance.template === "classic" ? "Clásico" : "Minimal"} ·{" "}
+                      {cv.personal.title || "Sin cargo"} · Editado{" "}
+                      {new Date(cv.updatedAt).toLocaleDateString("es-CL")}
                     </div>
                   </div>
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 shrink-0 text-neutral-500 sm:opacity-0 sm:group-hover:opacity-100"
+                    >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => remove(cv.id)} className="text-destructive focus:text-destructive">
-                      <Trash2 className="h-4 w-4 mr-2" /> Delete
+                    <DropdownMenuItem
+                      onClick={() => remove(cv.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Eliminar
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -175,19 +189,21 @@ function Dashboard() {
       </main>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] bg-white sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Elegí el layout</DialogTitle>
+            <DialogTitle>Elegí el diseño</DialogTitle>
             <DialogDescription>
               Podés cambiarlo después en el editor. Esto solo define el punto de partida.
             </DialogDescription>
           </DialogHeader>
           <LayoutPicker value={pickedLayout} onChange={setPickedLayout} />
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="ghost" onClick={() => setCreateOpen(false)}>
+          <DialogFooter className="flex-col gap-2 sm:flex-row sm:gap-0">
+            <Button variant="ghost" className="w-full sm:w-auto" onClick={() => setCreateOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={() => create(pickedLayout)}>Crear resume</Button>
+            <Button className="w-full sm:w-auto" onClick={() => create(pickedLayout)}>
+              Crear CV
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

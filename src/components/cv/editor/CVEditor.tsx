@@ -110,7 +110,7 @@ export function CVEditor({ cv, update }: Props) {
 
   return (
     <div className="divide-y divide-neutral-100">
-      <Group title="Layout">
+      <Group title="Diseño">
         <LayoutPicker
           value={cv.appearance.template === "classic" ? "classic" : "minimal"}
           onChange={(template) =>
@@ -122,12 +122,12 @@ export function CVEditor({ cv, update }: Props) {
         />
       </Group>
 
-      <Group title="Idioma / Language">
+      <Group title="Idioma">
         <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 px-3 py-2.5">
           <div>
             <div className="text-sm font-medium">Versión del CV</div>
             <div className="text-xs text-neutral-500">
-              ES y EN son independientes. Al cambiar por primera vez se copia el contenido para que lo edites.
+              ES y EN son independientes. La primera vez que cambiás se copia el contenido para que lo edites.
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -145,7 +145,7 @@ export function CVEditor({ cv, update }: Props) {
         </div>
       </Group>
 
-      <Group title="Personal information">
+      <Group title="Datos personales">
         <div className="flex items-center gap-4 mb-2">
           <button
             type="button"
@@ -187,11 +187,11 @@ export function CVEditor({ cv, update }: Props) {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Full name" value={cv.personal.fullName} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, fullName: v } }))} />
-          <Field label="Title" value={cv.personal.title} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, title: v } }))} />
-          <Field label="Email" value={cv.personal.email} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, email: v } }))} />
-          <Field label="Phone" value={cv.personal.phone} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, phone: v } }))} />
-          <Field label="City" value={cv.personal.city} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, city: v } }))} />
+          <Field label="Nombre completo" value={cv.personal.fullName} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, fullName: v } }))} />
+          <Field label="Cargo" value={cv.personal.title} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, title: v } }))} />
+          <Field label="Correo" value={cv.personal.email} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, email: v } }))} />
+          <Field label="Teléfono" value={cv.personal.phone} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, phone: v } }))} />
+          <Field label="Ciudad" value={cv.personal.city} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, city: v } }))} />
           <Field label="LinkedIn" value={cv.personal.linkedin} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, linkedin: v } }))} />
           <Field label="GitHub" value={cv.personal.github} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, github: v } }))} />
           <Field label="Website" value={cv.personal.website} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, website: v } }))} />
@@ -199,32 +199,32 @@ export function CVEditor({ cv, update }: Props) {
       </Group>
 
       <Group
-        title="Sections"
+        title="Secciones"
         right={
           <div className="flex gap-1">
             <Button
               size="sm"
               variant="ghost"
               className="h-8 gap-1 text-xs"
-              onClick={() => setSections([...cv.sections, newSection(cv.locale === "es" ? "Nueva sección" : "New section", "text")])}
+              onClick={() => setSections([...cv.sections, newSection(cv.locale === "es" ? "Nueva sección" : "Nueva sección", "text")])}
             >
-              <Plus className="h-3.5 w-3.5" /> Text
+              <Plus className="h-3.5 w-3.5" /> Texto
             </Button>
             <Button
               size="sm"
               variant="ghost"
               className="h-8 gap-1 text-xs"
-              onClick={() => setSections([...cv.sections, newSection(cv.locale === "es" ? "Nueva sección" : "New section", "entries")])}
+              onClick={() => setSections([...cv.sections, newSection(cv.locale === "es" ? "Nueva sección" : "Nueva sección", "entries")])}
             >
-              <Plus className="h-3.5 w-3.5" /> Entries
+              <Plus className="h-3.5 w-3.5" /> Entradas
             </Button>
             <Button
               size="sm"
               variant="ghost"
               className="h-8 gap-1 text-xs"
-              onClick={() => setSections([...cv.sections, newSection(cv.locale === "es" ? "Nueva sección" : "New section", "tags")])}
+              onClick={() => setSections([...cv.sections, newSection(cv.locale === "es" ? "Nueva sección" : "Nueva sección", "tags")])}
             >
-              <Plus className="h-3.5 w-3.5" /> Tags
+              <Plus className="h-3.5 w-3.5" /> Etiquetas
             </Button>
           </div>
         }
@@ -245,7 +245,7 @@ export function CVEditor({ cv, update }: Props) {
               </button>
               <div className="flex-1 grid grid-cols-2 gap-3">
                 <Field
-                  label="Section title"
+                  label="Título de sección"
                   value={section.title}
                   onChange={(v) => setSections(patchSection(cv.sections, section.id, { title: v }))}
                 />
@@ -266,19 +266,19 @@ export function CVEditor({ cv, update }: Props) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="text">Text</SelectItem>
-                      <SelectItem value="entries">Entries (jobs, edu…)</SelectItem>
-                      <SelectItem value="tags">Tags / list</SelectItem>
+                      <SelectItem value="text">Texto</SelectItem>
+                      <SelectItem value="entries">Entradas (trabajo, estudios…)</SelectItem>
+                      <SelectItem value="tags">Etiquetas / lista</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <ColorField
-                  label="Title color"
+                  label="Color del título"
                   value={section.titleColor}
                   onChange={(v) => setSections(patchSection(cv.sections, section.id, { titleColor: v }))}
                 />
                 <ColorField
-                  label="Subtitle color"
+                  label="Color del subtítulo"
                   value={section.subtitleColor}
                   onChange={(v) => setSections(patchSection(cv.sections, section.id, { subtitleColor: v }))}
                 />
@@ -300,8 +300,8 @@ export function CVEditor({ cv, update }: Props) {
                 className={areaCls}
                 placeholder={
                   section.kind === "tags"
-                    ? "One item per line, or Category: a, b, c"
-                    : "Section content…"
+                    ? "Un ítem por línea, o Categoría: a, b, c"
+                    : "Contenido de la sección…"
                 }
               />
             ) : (
@@ -326,18 +326,18 @@ export function CVEditor({ cv, update }: Props) {
                     </Button>
                     <div className="grid grid-cols-2 gap-2 pr-8">
                       <Field
-                        label="Heading"
+                        label="Título"
                         value={entry.heading}
                         onChange={(v) => setSections(patchEntry(cv.sections, section.id, entry.id, { heading: v }))}
                       />
                       <Field
-                        label="Subheading"
+                        label="Subtítulo"
                         value={entry.subheading}
                         onChange={(v) => setSections(patchEntry(cv.sections, section.id, entry.id, { subheading: v }))}
                       />
                       <div className="col-span-2">
                         <Field
-                          label="Meta (dates, link…)"
+                          label="Meta (fechas, enlace…)"
                           value={entry.meta}
                           onChange={(v) => setSections(patchEntry(cv.sections, section.id, entry.id, { meta: v }))}
                         />
@@ -346,13 +346,13 @@ export function CVEditor({ cv, update }: Props) {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-3">
                         <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">
-                          Description
+                          Descripción
                         </Label>
                         <div className="flex items-center gap-2">
                           <span
                             className={`text-xs ${(entry.bodyFormat ?? "bullets") === "text" ? "text-neutral-400" : "text-foreground font-medium"}`}
                           >
-                            Bullets
+                            Viñetas
                           </span>
                           <Switch
                             checked={(entry.bodyFormat ?? "bullets") === "text"}
@@ -470,7 +470,7 @@ export function CVEditor({ cv, update }: Props) {
                               );
                             }}
                           >
-                            <Plus className="h-3.5 w-3.5" /> Add bullet
+                            <Plus className="h-3.5 w-3.5" /> Agregar viñeta
                           </Button>
                         </div>
                       )}
@@ -489,13 +489,13 @@ export function CVEditor({ cv, update }: Props) {
                     )
                   }
                 >
-                  <Plus className="h-3.5 w-3.5 mr-1" /> Add entry
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Agregar entrada
                 </Button>
               </div>
             )}
 
             <div className="flex items-center gap-2 pt-1">
-              <Label className="text-[11px] text-neutral-500">Section image</Label>
+              <Label className="text-[11px] text-neutral-500">Imagen de sección</Label>
               <Input
                 type="file"
                 accept="image/*"
@@ -514,7 +514,7 @@ export function CVEditor({ cv, update }: Props) {
                   className="h-8 text-xs"
                   onClick={() => setSections(patchSection(cv.sections, section.id, { imageDataUrl: undefined }))}
                 >
-                  Remove
+                  Quitar
                 </Button>
               )}
             </div>
@@ -522,11 +522,11 @@ export function CVEditor({ cv, update }: Props) {
         ))}
       </Group>
 
-      <Group title="Appearance">
+      <Group title="Apariencia">
         <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 px-3 py-2.5 mb-2">
           <div>
             <div className="text-sm font-medium">Modo ATS</div>
-            <div className="text-xs text-neutral-500">Oculta fotos e imágenes al exportar / preview</div>
+            <div className="text-xs text-neutral-500">Oculta fotos e imágenes al exportar / vista previa</div>
           </div>
           <Switch
             checked={cv.appearance.atsMode}
@@ -555,22 +555,22 @@ export function CVEditor({ cv, update }: Props) {
             </Select>
           </div>
           <ColorField
-            label="Accent (default)"
+            label="Color de acento"
             value={cv.appearance.accentColor}
             onChange={(v) => update((p) => ({ ...p, appearance: { ...p.appearance, accentColor: v } }))}
           />
           <ColorField
-            label="Name color"
+            label="Color del nombre"
             value={cv.appearance.nameColor}
             onChange={(v) => update((p) => ({ ...p, appearance: { ...p.appearance, nameColor: v } }))}
           />
           <ColorField
-            label="Title / subtitle color"
+            label="Color del cargo"
             value={cv.appearance.titleColor}
             onChange={(v) => update((p) => ({ ...p, appearance: { ...p.appearance, titleColor: v } }))}
           />
           <Field
-            label="Font size (pt)"
+            label="Tamaño (pt)"
             type="number"
             value={String(cv.appearance.fontSize)}
             onChange={(v) =>
@@ -581,7 +581,7 @@ export function CVEditor({ cv, update }: Props) {
             }
           />
           <Field
-            label="Line height"
+            label="Interlineado"
             type="number"
             value={String(cv.appearance.spacing)}
             onChange={(v) =>
@@ -592,7 +592,7 @@ export function CVEditor({ cv, update }: Props) {
             }
           />
           <Field
-            label="Margin (mm)"
+            label="Margen (mm)"
             type="number"
             value={String(cv.appearance.margin)}
             onChange={(v) =>

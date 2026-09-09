@@ -47,7 +47,7 @@ export type TemplateId = "minimal" | "classic";
 
 export const TEMPLATE_OPTIONS: { id: TemplateId; label: string; hint: string }[] = [
   { id: "minimal", label: "Minimal B/N", hint: "Limpio, sin raya bajo el nombre" },
-  { id: "classic", label: "Classic", hint: "Nombre + raya (estilo CV tipográfico)" },
+  { id: "classic", label: "Clásico", hint: "Nombre + raya (estilo tipográfico)" },
 ];
 
 export interface Appearance {
