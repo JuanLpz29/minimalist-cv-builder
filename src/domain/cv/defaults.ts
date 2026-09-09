@@ -7,6 +7,7 @@ import type {
   PersonalInfo,
   SectionEntry,
   SectionKind,
+  TemplateId,
 } from "./types";
 
 export const uid = () =>
@@ -57,6 +58,23 @@ export const defaultAppearance = (): Appearance => ({
   atsMode: false,
 });
 
+/** Apply layout + sensible default colors for that template. */
+export function appearanceForTemplate(template: TemplateId, base?: Appearance): Appearance {
+  const a = { ...(base ?? defaultAppearance()), template };
+  if (template === "classic") {
+    return {
+      ...a,
+      accentColor: a.accentColor === "#111111" ? "#3B7A8A" : a.accentColor,
+      nameColor: a.nameColor === "#111111" ? "#3B7A8A" : a.nameColor,
+    };
+  }
+  return {
+    ...a,
+    accentColor: a.accentColor === "#3B7A8A" ? "#111111" : a.accentColor,
+    nameColor: a.nameColor === "#3B7A8A" ? "#111111" : a.nameColor,
+  };
+}
+
 export const emptyPersonal = (): PersonalInfo => ({
   fullName: "",
   title: "",
@@ -86,7 +104,7 @@ const STARTER: Record<Locale, { title: string; kind: SectionKind }[]> = {
 export const defaultSections = (locale: Locale = "es"): CVSection[] =>
   STARTER[locale].map((s) => newSection(s.title, s.kind));
 
-export const newCV = (title = "Untitled CV", locale: Locale = "es"): CV => {
+export const newCV = (title = "Untitled CV", locale: Locale = "es", template: TemplateId = "minimal"): CV => {
   const now = Date.now();
   return {
     id: uid(),
@@ -96,7 +114,7 @@ export const newCV = (title = "Untitled CV", locale: Locale = "es"): CV => {
     locale,
     personal: emptyPersonal(),
     sections: defaultSections(locale),
-    appearance: defaultAppearance(),
+    appearance: appearanceForTemplate(template),
   };
 };
 

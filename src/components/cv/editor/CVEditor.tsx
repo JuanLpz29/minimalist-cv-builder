@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
 import type { CV, CVSection, Locale, SectionEntry, SectionKind } from "@/domain/cv/types";
 import { FONT_FAMILIES } from "@/domain/cv/types";
-import { newEntry, newSection, switchLocale } from "@/domain/cv/defaults";
+import { appearanceForTemplate, newEntry, newSection, switchLocale } from "@/domain/cv/defaults";
 import { Field, SectionHeader } from "./Field";
+import { LayoutPicker } from "../LayoutPicker";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -109,6 +110,18 @@ export function CVEditor({ cv, update }: Props) {
 
   return (
     <div className="divide-y divide-neutral-100">
+      <Group title="Layout">
+        <LayoutPicker
+          value={cv.appearance.template === "classic" ? "classic" : "minimal"}
+          onChange={(template) =>
+            update((p) => ({
+              ...p,
+              appearance: appearanceForTemplate(template, p.appearance),
+            }))
+          }
+        />
+      </Group>
+
       <Group title="Idioma / Language">
         <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 px-3 py-2.5">
           <div>
@@ -521,45 +534,6 @@ export function CVEditor({ cv, update }: Props) {
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5 col-span-2">
-            <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">
-              Layout
-            </Label>
-            <Select
-              value={cv.appearance.template === "classic" ? "classic" : "minimal"}
-              onValueChange={(v) => {
-                const template = v as CV["appearance"]["template"];
-                update((p) => ({
-                  ...p,
-                  appearance: {
-                    ...p.appearance,
-                    template,
-                    // Classic defaults to teal accent like the reference CV
-                    ...(template === "classic" && p.appearance.accentColor === "#111111"
-                      ? {
-                          accentColor: "#3B7A8A",
-                          nameColor: "#3B7A8A",
-                        }
-                      : {}),
-                    ...(template === "minimal"
-                      ? {
-                          accentColor: p.appearance.accentColor === "#3B7A8A" ? "#111111" : p.appearance.accentColor,
-                          nameColor: p.appearance.nameColor === "#3B7A8A" ? "#111111" : p.appearance.nameColor,
-                        }
-                      : {}),
-                  },
-                }));
-              }}
-            >
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="minimal">Minimal B/N — limpio</SelectItem>
-                <SelectItem value="classic">Classic — nombre + raya</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
           <div className="space-y-1.5">
             <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">Font</Label>
             <Select

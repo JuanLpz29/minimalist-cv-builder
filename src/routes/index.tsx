@@ -3,15 +3,24 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, FileText, Trash2, MoreHorizontal, Upload } from "lucide-react";
 import { localRepository } from "@/domain/cv/repository";
-import { newCV } from "@/domain/cv/defaults";
+import { appearanceForTemplate, newCV } from "@/domain/cv/defaults";
 import { importCvFromFile } from "@/domain/cv/import/fromFile";
-import type { CV } from "@/domain/cv/types";
+import type { CV, TemplateId } from "@/domain/cv/types";
+import { LayoutPicker } from "@/components/cv/LayoutPicker";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({ component: Dashboard });
@@ -19,6 +28,8 @@ export const Route = createFileRoute("/")({ component: Dashboard });
 function Dashboard() {
   const [cvs, setCVs] = useState<CV[]>([]);
   const [importing, setImporting] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [pickedLayout, setPickedLayout] = useState<TemplateId>("minimal");
   const fileRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -26,9 +37,10 @@ function Dashboard() {
     localRepository.list().then(setCVs);
   }, []);
 
-  const create = async () => {
-    const cv = newCV("Untitled CV");
+  const create = async (template: TemplateId) => {
+    const cv = newCV("Untitled CV", "es", template);
     await localRepository.save(cv);
+    setCreateOpen(false);
     navigate({ to: "/cv/$id", params: { id: cv.id } });
   };
 
@@ -42,6 +54,8 @@ function Dashboard() {
     setImporting(true);
     try {
       const cv = await importCvFromFile(file);
+      // Keep imported content; ask layout via quick toast defaults to classic-friendly if teal-ish later
+      cv.appearance = appearanceForTemplate(cv.appearance.template ?? "minimal", cv.appearance);
       await localRepository.save(cv);
       toast.success("CV importado — revisá los campos y ajustá lo que falte");
       navigate({ to: "/cv/$id", params: { id: cv.id } });
@@ -52,6 +66,11 @@ function Dashboard() {
       setImporting(false);
       if (fileRef.current) fileRef.current.value = "";
     }
+  };
+
+  const openCreate = () => {
+    setPickedLayout("minimal");
+    setCreateOpen(true);
   };
 
   return (
@@ -91,7 +110,7 @@ function Dashboard() {
               <Upload className="h-4 w-4" />
               {importing ? "Importando…" : "Import PDF/DOCX"}
             </Button>
-            <Button onClick={create} className="h-9 gap-1.5">
+            <Button onClick={openCreate} className="h-9 gap-1.5">
               <Plus className="h-4 w-4" />
               New resume
             </Button>
@@ -108,7 +127,7 @@ function Dashboard() {
                 <Upload className="h-3.5 w-3.5 mr-1.5" />
                 Import PDF/DOCX
               </Button>
-              <Button size="sm" onClick={create}>
+              <Button size="sm" onClick={openCreate}>
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 New resume
               </Button>
@@ -131,6 +150,7 @@ function Dashboard() {
                       {cv.personal.fullName || cv.title}
                     </div>
                     <div className="text-xs text-neutral-500 truncate">
+                      {cv.appearance.template === "classic" ? "Classic" : "Minimal"} ·{" "}
                       {cv.personal.title || "No title"} · Edited{" "}
                       {new Date(cv.updatedAt).toLocaleDateString()}
                     </div>
@@ -153,6 +173,24 @@ function Dashboard() {
           </ul>
         )}
       </main>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Elegí el layout</DialogTitle>
+            <DialogDescription>
+              Podés cambiarlo después en el editor. Esto solo define el punto de partida.
+            </DialogDescription>
+          </DialogHeader>
+          <LayoutPicker value={pickedLayout} onChange={setPickedLayout} />
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setCreateOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => create(pickedLayout)}>Crear resume</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
