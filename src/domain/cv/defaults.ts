@@ -101,8 +101,143 @@ const STARTER: Record<Locale, { title: string; kind: SectionKind }[]> = {
   ],
 };
 
+/** Contenido de ejemplo para llegar y reemplazar (no vacío). */
+export const samplePersonal = (locale: Locale = "es"): PersonalInfo =>
+  locale === "en"
+    ? {
+        fullName: "Alex Rivera",
+        title: "Product Designer",
+        email: "alex.rivera@email.com",
+        phone: "+1 555 010 2030",
+        city: "Remote · LatAm",
+        linkedin: "linkedin.com/in/alexrivera",
+        github: "",
+        website: "alexrivera.design",
+      }
+    : {
+        fullName: "Alex Rivera",
+        title: "Diseñador/a de producto",
+        email: "alex.rivera@email.com",
+        phone: "+56 9 1234 5678",
+        city: "Santiago, Chile",
+        linkedin: "linkedin.com/in/alexrivera",
+        github: "",
+        website: "alexrivera.design",
+      };
+
+export const sampleSections = (locale: Locale = "es"): CVSection[] => {
+  if (locale === "en") {
+    return [
+      {
+        ...newSection("Professional summary", "text"),
+        body: "Product designer with 6+ years shipping B2B and consumer experiences. I turn fuzzy problems into clear interfaces, partner closely with eng and research, and care about measurable outcomes—not just pretty screens.",
+      },
+      {
+        ...newSection("Experience", "entries"),
+        entries: [
+          {
+            id: uid(),
+            heading: "Senior Product Designer",
+            subheading: "Northwind · Remote",
+            meta: "2022 — Present",
+            body: "Led redesign of onboarding; activation +18%\nOwned design system foundations used by 4 squads\nRan weekly discovery with PMs and researchers",
+            bodyFormat: "bullets",
+          },
+          {
+            id: uid(),
+            heading: "Product Designer",
+            subheading: "Acme Apps · Hybrid",
+            meta: "2019 — 2022",
+            body: "Shipped mobile checkout end-to-end with eng\nCut support tickets related to payments by ~25%\nMentored 2 junior designers",
+            bodyFormat: "bullets",
+          },
+        ],
+      },
+      {
+        ...newSection("Education", "entries"),
+        entries: [
+          {
+            id: uid(),
+            heading: "B.A. Design",
+            subheading: "Universidad Ejemplo",
+            meta: "2014 — 2018",
+            body: "",
+            bodyFormat: "text",
+          },
+        ],
+      },
+      {
+        ...newSection("Skills", "tags"),
+        body: "Figma, Prototyping, Design systems, User research, Facilitation, HTML/CSS",
+      },
+    ];
+  }
+
+  return [
+    {
+      ...newSection("Perfil profesional", "text"),
+      body: "Diseñador/a de producto con más de 6 años creando experiencias B2B y consumer. Transformo problemas ambiguos en interfaces claras, trabajo codo a codo con engineering e investigación, y me importa el impacto medible — no solo pantallas bonitas.",
+    },
+    {
+      ...newSection("Experiencia", "entries"),
+      entries: [
+        {
+          id: uid(),
+          heading: "Senior Product Designer",
+          subheading: "Northwind · Remoto",
+          meta: "2022 — Actualidad",
+          body: "Lideré el rediseño del onboarding; activación +18%\nDueño/a de bases del design system usadas por 4 squads\nDiscovery semanal con PMs e investigadores",
+          bodyFormat: "bullets",
+        },
+        {
+          id: uid(),
+          heading: "Product Designer",
+          subheading: "Acme Apps · Híbrido",
+          meta: "2019 — 2022",
+          body: "Checkout mobile de punta a punta con engineering\nBajé ~25% los tickets de soporte ligados a pagos\nMentoreé a 2 diseñadores junior",
+          bodyFormat: "bullets",
+        },
+      ],
+    },
+    {
+      ...newSection("Educación", "entries"),
+      entries: [
+        {
+          id: uid(),
+          heading: "Licenciatura en Diseño",
+          subheading: "Universidad Ejemplo",
+          meta: "2014 — 2018",
+          body: "",
+          bodyFormat: "text",
+        },
+      ],
+    },
+    {
+      ...newSection("Habilidades", "tags"),
+      body: "Figma, Prototipado, Design systems, Research, Facilitación, HTML/CSS",
+    },
+  ];
+};
+
 export const defaultSections = (locale: Locale = "es"): CVSection[] =>
   STARTER[locale].map((s) => newSection(s.title, s.kind));
+
+export const EXAMPLE_CV_ID = "cv-ejemplo";
+
+/** CV de ejemplo fijo en la lista — llegar y reemplazar. */
+export const exampleCV = (template: TemplateId = "minimal"): CV => {
+  const now = Date.now();
+  return {
+    id: EXAMPLE_CV_ID,
+    title: "CV De ejemplo",
+    createdAt: now,
+    updatedAt: now,
+    locale: "es",
+    personal: samplePersonal("es"),
+    sections: sampleSections("es"),
+    appearance: appearanceForTemplate(template),
+  };
+};
 
 export const newCV = (title = "Untitled CV", locale: Locale = "es", template: TemplateId = "minimal"): CV => {
   const now = Date.now();

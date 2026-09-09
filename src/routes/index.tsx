@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, Trash2, MoreHorizontal, Upload } from "lucide-react";
+import { Plus, Trash2, MoreHorizontal, Upload } from "lucide-react";
 import { localRepository } from "@/domain/cv/repository";
-import { appearanceForTemplate, newCV } from "@/domain/cv/defaults";
+import { appearanceForTemplate, EXAMPLE_CV_ID, exampleCV, newCV } from "@/domain/cv/defaults";
 import { importCvFromFile } from "@/domain/cv/import/fromFile";
 import type { CV, TemplateId } from "@/domain/cv/types";
 import { LayoutPicker } from "@/components/cv/LayoutPicker";
@@ -25,6 +25,18 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({ component: Dashboard });
 
+const EXAMPLE_DELETED_KEY = "mitrilo.example.deleted";
+
+async function loadCVs(): Promise<CV[]> {
+  const list = await localRepository.list();
+  if (list.some((c) => c.id === EXAMPLE_CV_ID)) return list;
+  if (typeof window !== "undefined" && window.localStorage.getItem(EXAMPLE_DELETED_KEY)) {
+    return list;
+  }
+  await localRepository.save(exampleCV());
+  return localRepository.list();
+}
+
 function Dashboard() {
   const [cvs, setCVs] = useState<CV[]>([]);
   const [importing, setImporting] = useState(false);
@@ -34,7 +46,7 @@ function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    localRepository.list().then(setCVs);
+    loadCVs().then(setCVs);
   }, []);
 
   const create = async (template: TemplateId) => {
@@ -46,6 +58,7 @@ function Dashboard() {
 
   const remove = async (id: string) => {
     await localRepository.remove(id);
+    if (id === EXAMPLE_CV_ID) window.localStorage.setItem(EXAMPLE_DELETED_KEY, "1");
     setCVs((prev) => prev.filter((c) => c.id !== id));
   };
 
@@ -89,7 +102,7 @@ function Dashboard() {
           <div>
             <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Tus currículums</h1>
             <p className="mt-1 text-sm text-neutral-500">
-              Importá un PDF/DOCX, editá los campos y exportá de nuevo a PDF.
+              Abrí el ejemplo y reemplazá el texto, o importá / creá uno nuevo.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -116,76 +129,49 @@ function Dashboard() {
           </div>
         </div>
 
-        {cvs.length === 0 ? (
-          <div className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-neutral-200 bg-white py-16 text-neutral-500 sm:py-20">
-            <FileText className="mb-3 h-6 w-6" strokeWidth={1.5} />
-            <div className="text-sm font-medium text-neutral-700">Todavía no hay currículums</div>
-            <div className="mb-4 mt-1 px-4 text-center text-xs text-neutral-400">
-              Importá tu CV o empezá en blanco
-            </div>
-            <div className="flex w-full max-w-xs flex-col gap-2 sm:max-w-none sm:w-auto sm:flex-row">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full sm:w-auto"
-                disabled={importing}
-                onClick={() => fileRef.current?.click()}
+        <ul className="divide-y divide-neutral-100 border-y border-neutral-100">
+          {cvs.map((cv) => (
+            <li key={cv.id} className="group flex items-center justify-between gap-2 py-4">
+              <Link
+                to="/cv/$id"
+                params={{ id: cv.id }}
+                className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4"
               >
-                <Upload className="mr-1.5 h-3.5 w-3.5" />
-                Importar PDF/DOCX
-              </Button>
-              <Button size="sm" className="w-full sm:w-auto" onClick={openCreate}>
-                <Plus className="mr-1.5 h-3.5 w-3.5" />
-                Nuevo CV
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <ul className="divide-y divide-neutral-100 border-y border-neutral-100">
-            {cvs.map((cv) => (
-              <li key={cv.id} className="group flex items-center justify-between gap-2 py-4">
-                <Link
-                  to="/cv/$id"
-                  params={{ id: cv.id }}
-                  className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4"
-                >
-                  <div className="flex h-10 w-8 shrink-0 items-center justify-center rounded-sm border border-neutral-200 bg-white">
-                    <div className="h-1 w-4 rounded-full bg-neutral-300" />
+                <div className="flex h-10 w-8 shrink-0 items-center justify-center rounded-sm border border-neutral-200 bg-white">
+                  <div className="h-1 w-4 rounded-full bg-neutral-300" />
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium">{cv.title}</div>
+                  <div className="truncate text-xs text-neutral-500">
+                    {cv.appearance.template === "classic" ? "Clásico" : "Minimal"} ·{" "}
+                    {cv.personal.fullName || "Sin nombre"}
+                    {cv.personal.title ? ` · ${cv.personal.title}` : ""} · Editado{" "}
+                    {new Date(cv.updatedAt).toLocaleDateString("es-CL")}
                   </div>
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium">
-                      {cv.personal.fullName || cv.title}
-                    </div>
-                    <div className="truncate text-xs text-neutral-500">
-                      {cv.appearance.template === "classic" ? "Clásico" : "Minimal"} ·{" "}
-                      {cv.personal.title || "Sin cargo"} · Editado{" "}
-                      {new Date(cv.updatedAt).toLocaleDateString("es-CL")}
-                    </div>
-                  </div>
-                </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 shrink-0 text-neutral-500 sm:opacity-0 sm:group-hover:opacity-100"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() => remove(cv.id)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> Eliminar
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </li>
-            ))}
-          </ul>
-        )}
+                </div>
+              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 shrink-0 text-neutral-500 sm:opacity-0 sm:group-hover:opacity-100"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => remove(cv.id)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </li>
+          ))}
+        </ul>
       </main>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -193,7 +179,7 @@ function Dashboard() {
           <DialogHeader>
             <DialogTitle>Elegí el diseño</DialogTitle>
             <DialogDescription>
-              Podés cambiarlo después en el editor. Esto solo define el punto de partida.
+              CV en blanco. El diseño lo podés cambiar después en el editor.
             </DialogDescription>
           </DialogHeader>
           <LayoutPicker value={pickedLayout} onChange={setPickedLayout} />
