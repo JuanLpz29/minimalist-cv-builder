@@ -330,14 +330,138 @@ export function CVEditor({ cv, update }: Props) {
                         />
                       </div>
                     </div>
-                    <Textarea
-                      value={entry.body}
-                      onChange={(e) =>
-                        setSections(patchEntry(cv.sections, section.id, entry.id, { body: e.target.value }))
-                      }
-                      className={areaCls}
-                      placeholder="Bullets or description"
-                    />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">
+                          Description
+                        </Label>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-xs ${(entry.bodyFormat ?? "bullets") === "text" ? "text-neutral-400" : "text-foreground font-medium"}`}
+                          >
+                            Bullets
+                          </span>
+                          <Switch
+                            checked={(entry.bodyFormat ?? "bullets") === "text"}
+                            onCheckedChange={(toText) =>
+                              setSections(
+                                patchEntry(cv.sections, section.id, entry.id, {
+                                  bodyFormat: toText ? "text" : "bullets",
+                                  // strip bullet markers when switching to text; keep lines
+                                  body: toText
+                                    ? entry.body
+                                        .split("\n")
+                                        .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
+                                        .filter(Boolean)
+                                        .join("\n")
+                                    : entry.body
+                                        .split("\n")
+                                        .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
+                                        .filter(Boolean)
+                                        .join("\n"),
+                                }),
+                              )
+                            }
+                          />
+                          <span
+                            className={`text-xs ${(entry.bodyFormat ?? "bullets") === "text" ? "text-foreground font-medium" : "text-neutral-400"}`}
+                          >
+                            Texto
+                          </span>
+                        </div>
+                      </div>
+
+                      {(entry.bodyFormat ?? "bullets") === "text" ? (
+                        <Textarea
+                          value={entry.body}
+                          onChange={(e) =>
+                            setSections(
+                              patchEntry(cv.sections, section.id, entry.id, { body: e.target.value }),
+                            )
+                          }
+                          className={areaCls}
+                          placeholder="Párrafo libre de descripción…"
+                        />
+                      ) : (
+                        <div className="space-y-1.5">
+                          {(entry.body.split("\n").length === 0 || entry.body === ""
+                            ? [""]
+                            : entry.body.split("\n")
+                          ).map((line, idx, arr) => (
+                            <div key={idx} className="flex items-center gap-1.5">
+                              <span className="text-neutral-400 text-sm shrink-0 w-3">•</span>
+                              <Input
+                                value={line.replace(/^[-•●▪◦*]+\s*/, "")}
+                                className="h-9 bg-transparent border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-0 shadow-none text-sm"
+                                placeholder="Logro o responsabilidad…"
+                                onChange={(e) => {
+                                  const lines =
+                                    entry.body === "" && arr.length === 1
+                                      ? [e.target.value]
+                                      : entry.body.split("\n");
+                                  lines[idx] = e.target.value;
+                                  setSections(
+                                    patchEntry(cv.sections, section.id, entry.id, {
+                                      body: lines.join("\n"),
+                                      bodyFormat: "bullets",
+                                    }),
+                                  );
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const lines = (entry.body === "" ? [""] : entry.body.split("\n"));
+                                    lines.splice(idx + 1, 0, "");
+                                    setSections(
+                                      patchEntry(cv.sections, section.id, entry.id, {
+                                        body: lines.join("\n"),
+                                        bodyFormat: "bullets",
+                                      }),
+                                    );
+                                  }
+                                }}
+                              />
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 shrink-0 text-neutral-400"
+                                disabled={arr.length <= 1 && !line.trim()}
+                                onClick={() => {
+                                  const lines = entry.body.split("\n").filter((_, i) => i !== idx);
+                                  setSections(
+                                    patchEntry(cv.sections, section.id, entry.id, {
+                                      body: lines.length ? lines.join("\n") : "",
+                                      bodyFormat: "bullets",
+                                    }),
+                                  );
+                                }}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-xs gap-1"
+                            onClick={() => {
+                              const lines = entry.body === "" ? [""] : entry.body.split("\n");
+                              lines.push("");
+                              setSections(
+                                patchEntry(cv.sections, section.id, entry.id, {
+                                  body: lines.join("\n"),
+                                  bodyFormat: "bullets",
+                                }),
+                              );
+                            }}
+                          >
+                            <Plus className="h-3.5 w-3.5" /> Add bullet
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
                 <Button

@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\n  \"systemMessage\": \"📎 Docs de negocio en /Users/juanlopez/Library/Mobile Documents/com~apple~CloudDocs/MITRILO/Proyectos/ventures/CV_BUILDER — corre /add-dir \\\"/Users/juanlopez/Library/Mobile Documents/com~apple~CloudDocs/MITRILO/Proyectos/ventures/CV_BUILDER\\\" si los necesitas\"\n}'"
+          }
+        ]
+      }
+    ]
+  }
+}

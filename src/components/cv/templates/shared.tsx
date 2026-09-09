@@ -20,7 +20,22 @@ export function SectionBody({ section, atsMode }: { section: CVSection; atsMode:
               </div>
             </div>
             {e.body && (
-              <div className="mt-1 whitespace-pre-wrap text-neutral-700">{e.body}</div>
+              e.bodyFormat === "text" ? (
+                <div className="mt-1 whitespace-pre-wrap text-neutral-700">{e.body}</div>
+              ) : (
+                <ul className="mt-1 space-y-0.5 text-neutral-700 list-none pl-0">
+                  {e.body
+                    .split("\n")
+                    .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
+                    .filter(Boolean)
+                    .map((line, i) => (
+                      <li key={i} className="flex gap-2">
+                        <span className="shrink-0 select-none">•</span>
+                        <span className="min-w-0">{line}</span>
+                      </li>
+                    ))}
+                </ul>
+              )
             )}
           </div>
         ))}

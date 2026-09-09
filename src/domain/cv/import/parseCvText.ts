@@ -109,7 +109,10 @@ function parseEntries(body: string[]): SectionEntry[] {
 
   const push = () => {
     if (!cur) return;
-    cur.body = flush.join("\n").trim();
+    const lines = flush.map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim()).filter(Boolean);
+    cur.body = lines.join("\n");
+    const hadBullets = flush.some((l) => /^[-•]/.test(l.trim()) || l.startsWith("•"));
+    cur.bodyFormat = hadBullets || lines.length > 1 ? "bullets" : "text";
     flush.length = 0;
     entries.push(cur);
     cur = null;
@@ -128,7 +131,7 @@ function parseEntries(body: string[]): SectionEntry[] {
         h.meta = `${dm[1].trim()} — ${dm[2].trim()}`;
         i++;
       }
-      cur = { id: uid(), body: "", ...h };
+      cur = { id: uid(), body: "", bodyFormat: "bullets", ...h };
       continue;
     }
 

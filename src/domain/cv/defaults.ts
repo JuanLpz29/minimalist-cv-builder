@@ -28,6 +28,7 @@ export const newEntry = (): SectionEntry => ({
   subheading: "",
   meta: "",
   body: "",
+  bodyFormat: "bullets",
 });
 
 export const newSection = (

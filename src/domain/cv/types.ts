@@ -24,6 +24,8 @@ export interface SectionEntry {
   subheading: string;
   meta: string;
   body: string;
+  /** bullets = one item per line; text = free paragraph */
+  bodyFormat?: "bullets" | "text";
 }
 
 export interface CVSection {
