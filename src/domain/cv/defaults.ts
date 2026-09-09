@@ -52,11 +52,12 @@ export const defaultAppearance = (): Appearance => ({
   template: "minimal",
   font: "Inter",
   fontSize: 11,
-  spacing: 1.4,
+  spacing: 1.5,
   accentColor: defaultColors.accent,
   nameColor: defaultColors.name,
   titleColor: defaultColors.title,
-  margin: 18,
+  /** Alineado al CV de referencia (~20 mm en A4) */
+  margin: 20,
   atsMode: false,
 });
 

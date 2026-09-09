@@ -73,7 +73,7 @@ function EditorPage() {
   }
 
   return (
-    <div className="flex h-dvh flex-col bg-white text-neutral-900">
+    <div className="flex h-dvh flex-col bg-white text-neutral-900 print:h-auto print:block">
       <header className="no-print flex h-14 shrink-0 items-center gap-2 border-b border-neutral-100 bg-white px-3 sm:gap-3 sm:px-4">
         <Link
           to="/"
@@ -178,9 +178,9 @@ function EditorPage() {
         </button>
       </div>
 
-      <div className="grid flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[minmax(0,480px)_1fr]">
+      <div className="grid no-print flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[minmax(0,480px)_1fr]">
         <div
-          className={`no-print overflow-y-auto border-r border-neutral-100 bg-white ${
+          className={`overflow-y-auto border-r border-neutral-100 bg-white ${
             mobileTab === "edit" ? "block" : "hidden lg:block"
           }`}
         >
@@ -196,10 +196,15 @@ function EditorPage() {
         >
           <div className="flex justify-center px-3 py-6 sm:px-6 sm:py-10">
             <div className="origin-top" style={{ transform: `scale(${previewScale})` }}>
-              <CVPreview cv={cv} printRoot />
+              <CVPreview cv={cv} />
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Fuera del layout (hidden/scale) — si no, el PDF sale en blanco */}
+      <div id="print-root" className="print-only">
+        <CVPreview cv={cv} />
       </div>
     </div>
   );

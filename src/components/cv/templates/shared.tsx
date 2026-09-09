@@ -1,35 +1,46 @@
 import type { CV, CVSection } from "@/domain/cv/types";
 
+function BulletList({
+  body,
+  marker = "•",
+}: {
+  body: string;
+  marker?: string;
+}) {
+  const lines = body
+    .split("\n")
+    .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
+    .filter(Boolean);
+  if (!lines.length) return null;
+  return (
+    <ul className="mt-1.5 space-y-1.5 text-neutral-700 list-none pl-0">
+      {lines.map((line, i) => (
+        <li key={i} className="cv-entry-block flex gap-2.5">
+          <span className="shrink-0 select-none w-3 text-center">{marker}</span>
+          <span className="min-w-0 flex-1">{line}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function SectionBody({ section }: { section: CVSection }) {
   if (section.kind === "entries") {
     return (
-      <div className="space-y-3.5">
+      <div className="space-y-5">
         {section.entries.map((e) => (
-          <div key={e.id}>
-            <div className="flex justify-between gap-4 items-baseline">
-              <div
-                className="font-semibold uppercase tracking-wide text-[0.95em] min-w-0"
-                style={{ color: section.subtitleColor }}
-              >
-                {[e.heading, e.subheading, e.meta].filter(Boolean).join(" | ") || "—"}
-              </div>
+          <div key={e.id} className="cv-entry-block">
+            <div
+              className="font-semibold uppercase tracking-wide text-[0.95em] min-w-0"
+              style={{ color: section.subtitleColor }}
+            >
+              {[e.heading, e.subheading, e.meta].filter(Boolean).join(" | ") || "—"}
             </div>
             {e.body &&
               (e.bodyFormat === "text" ? (
-                <div className="mt-1 whitespace-pre-wrap text-neutral-700">{e.body}</div>
+                <div className="mt-1.5 whitespace-pre-wrap text-neutral-700">{e.body}</div>
               ) : (
-                <ul className="mt-1 space-y-0.5 text-neutral-700 list-none pl-0">
-                  {e.body
-                    .split("\n")
-                    .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
-                    .filter(Boolean)
-                    .map((line, i) => (
-                      <li key={i} className="flex gap-2">
-                        <span className="shrink-0 select-none">•</span>
-                        <span className="min-w-0">{line}</span>
-                      </li>
-                    ))}
-                </ul>
+                <BulletList body={e.body} marker="-" />
               ))}
           </div>
         ))}
@@ -40,16 +51,16 @@ export function SectionBody({ section }: { section: CVSection }) {
   if (section.kind === "tags") {
     const lines = section.body.split("\n").map((l) => l.trim()).filter(Boolean);
     return (
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         {lines.map((line, i) => {
           const idx = line.indexOf(":");
           if (idx > 0 && idx < 40) {
             return (
-              <div key={i}>
+              <div key={i} className="cv-entry-block">
                 <div className="font-medium" style={{ color: section.subtitleColor }}>
                   {line.slice(0, idx)}
                 </div>
-                <div className="text-neutral-700">{line.slice(idx + 1).trim()}</div>
+                <div className="text-neutral-700 mt-0.5">{line.slice(idx + 1).trim()}</div>
               </div>
             );
           }
@@ -66,20 +77,9 @@ export function SectionBody({ section }: { section: CVSection }) {
   return (
     <div>
       {section.bodyFormat === "bullets" ? (
-        <ul className="space-y-0.5 text-neutral-700 list-none pl-0">
-          {section.body
-            .split("\n")
-            .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
-            .filter(Boolean)
-            .map((line, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="shrink-0 select-none">•</span>
-                <span className="min-w-0">{line}</span>
-              </li>
-            ))}
-        </ul>
+        <BulletList body={section.body} marker="-" />
       ) : (
-        <p className="whitespace-pre-wrap text-neutral-700">{section.body}</p>
+        <p className="whitespace-pre-wrap text-neutral-700 leading-[inherit]">{section.body}</p>
       )}
     </div>
   );

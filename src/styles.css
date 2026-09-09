@@ -131,41 +131,60 @@ body.dark {
 }
 
 .cv-page {
-  width: 8.5in;
-  min-height: 11in;
+  /* A4 como el CV de referencia (Google Docs) */
+  width: 210mm;
+  min-height: 297mm;
   background: white;
   color: #111;
+  box-sizing: border-box;
+}
+
+/* Solo para window.print() — fuera de hidden/transform del editor */
+.print-only {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 210mm;
+  pointer-events: none;
 }
 
 @media print {
   @page {
-    size: letter;
+    size: A4;
     margin: 0;
   }
   html,
   body {
     background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
   }
-  body * {
-    visibility: hidden !important;
+  /* Evita el truco visibility+absolute que recorta a 1 hoja */
+  .no-print {
+    display: none !important;
   }
-  #print-root,
-  #print-root * {
-    visibility: visible !important;
-  }
+  #print-root.print-only,
   #print-root {
-    position: absolute;
-    inset: 0;
-    margin: 0;
-    padding: 0;
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
   }
   .cv-page {
     box-shadow: none !important;
-    margin: 0 !important;
-    width: 100% !important;
-    min-height: 100vh !important;
+    margin: 0 auto !important;
+    width: 210mm !important;
+    min-height: 0 !important;
+    height: auto !important;
   }
-  .no-print {
-    display: none !important;
+  .cv-section,
+  .cv-entry-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }

@@ -559,7 +559,7 @@ export function CVEditor({ cv, update }: Props) {
             onChange={(v) =>
               update((p) => ({
                 ...p,
-                appearance: { ...p.appearance, spacing: Math.max(1, Math.min(2, Number(v) || 1.4)) },
+                appearance: { ...p.appearance, spacing: Math.max(1, Math.min(2, Number(v) || 1.5)) },
               }))
             }
           />
@@ -570,7 +570,7 @@ export function CVEditor({ cv, update }: Props) {
             onChange={(v) =>
               update((p) => ({
                 ...p,
-                appearance: { ...p.appearance, margin: Math.max(8, Math.min(30, Number(v) || 18)) },
+                appearance: { ...p.appearance, margin: Math.max(12, Math.min(32, Number(v) || 20)) },
               }))
             }
           />

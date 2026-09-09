@@ -16,7 +16,7 @@ export function MinimalTemplate({ cv }: { cv: CV }) {
 
   return (
     <PageShell cv={cv}>
-      <header className={`mb-6 ${showPhoto ? "flex gap-4 items-start" : ""}`}>
+      <header className={`mb-8 ${showPhoto ? "flex gap-4 items-start" : ""}`}>
         <Photo src={personal.photoDataUrl} atsMode={appearance.atsMode} />
         <div className="min-w-0 flex-1">
           <h1
@@ -26,11 +26,11 @@ export function MinimalTemplate({ cv }: { cv: CV }) {
             {personal.fullName || "Your Name"}
           </h1>
           {personal.title && (
-            <div className="mt-0.5 text-neutral-600" style={{ color: appearance.titleColor }}>
+            <div className="mt-1 text-neutral-600" style={{ color: appearance.titleColor }}>
               {personal.title}
             </div>
           )}
-          <div className="mt-2">
+          <div className="mt-3">
             <ContactLine bits={contactBits} />
           </div>
         </div>
@@ -41,9 +41,9 @@ export function MinimalTemplate({ cv }: { cv: CV }) {
           section.kind === "entries" ? section.entries.length === 0 : !section.body.trim();
         if (empty) return null;
         return (
-          <section key={section.id} className="mb-5">
+          <section key={section.id} className="cv-section mb-7">
             <h2
-              className="text-[10.5px] font-semibold uppercase tracking-[0.14em] mb-2"
+              className="text-[10.5px] font-semibold uppercase tracking-[0.14em] mb-3"
               style={{ color: section.titleColor || "#111" }}
             >
               {section.title}

@@ -20,7 +20,7 @@ export function ClassicTemplate({ cv }: { cv: CV }) {
 
   return (
     <PageShell cv={cv}>
-      <header className={`mb-6 ${showPhoto ? "flex gap-4 items-start" : ""}`}>
+      <header className={`mb-8 ${showPhoto ? "flex gap-4 items-start" : ""}`}>
         <Photo src={personal.photoDataUrl} atsMode={appearance.atsMode} />
         <div className="min-w-0 flex-1">
           <h1
@@ -30,11 +30,11 @@ export function ClassicTemplate({ cv }: { cv: CV }) {
             {personal.fullName || "Your Name"}
           </h1>
           {personal.title && (
-            <div className="mt-0.5 text-[11pt]" style={{ color: appearance.titleColor || "#525252" }}>
+            <div className="mt-1 text-[11pt]" style={{ color: appearance.titleColor || "#525252" }}>
               {personal.title}
             </div>
           )}
-          <div className="mt-2.5 mb-2 h-px w-full" style={{ backgroundColor: accent }} />
+          <div className="mt-3 mb-2.5 h-px w-full" style={{ backgroundColor: accent }} />
           <ContactLine bits={contactBits} />
         </div>
       </header>
@@ -44,9 +44,9 @@ export function ClassicTemplate({ cv }: { cv: CV }) {
           section.kind === "entries" ? section.entries.length === 0 : !section.body.trim();
         if (empty) return null;
         return (
-          <section key={section.id} className="mb-5">
+          <section key={section.id} className="cv-section mb-7">
             <h2
-              className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2"
+              className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3"
               style={{ color: section.titleColor || accent }}
             >
               {section.title}
