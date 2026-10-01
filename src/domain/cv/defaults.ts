@@ -131,7 +131,7 @@ export const sampleSections = (locale: Locale = "es"): CVSection[] => {
     return [
       {
         ...newSection("Professional summary", "text", undefined, "text"),
-        body: "Product designer with 6+ years shipping B2B and consumer experiences. I turn fuzzy problems into clear interfaces, partner closely with eng and research, and care about measurable outcomes—not just pretty screens.",
+        body: "Product designer with 6+ years shipping B2B and consumer experiences. I turn fuzzy problems into clear interfaces, partner closely with eng and research, and care about measurable outcomes, not just pretty screens.",
       },
       {
         ...newSection("Experience", "entries"),
@@ -177,7 +177,7 @@ export const sampleSections = (locale: Locale = "es"): CVSection[] => {
   return [
     {
       ...newSection("Perfil profesional", "text", undefined, "text"),
-      body: "Diseñador/a de producto con más de 6 años creando experiencias B2B y consumer. Transformo problemas ambiguos en interfaces claras, trabajo codo a codo con engineering e investigación, y me importa el impacto medible — no solo pantallas bonitas.",
+      body: "Diseñador/a de producto con más de 6 años creando experiencias B2B y consumer. Transformo problemas ambiguos en interfaces claras, trabajo codo a codo con engineering e investigación, y me importa el impacto medible, no solo pantallas bonitas.",
     },
     {
       ...newSection("Experiencia", "entries"),

@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { DonateCard } from "@/components/DonateLink";
+import { DonateCard } from "@/components/DonateCard";
 
 export const Route = createFileRoute("/")({ component: Dashboard });
 
@@ -70,7 +70,7 @@ function Dashboard() {
       const cv = await importCvFromFile(file);
       cv.appearance = appearanceForTemplate(cv.appearance.template ?? "minimal", cv.appearance);
       await localRepository.save(cv);
-      toast.success("CV importado — revisa los campos y ajusta lo que falte");
+      toast.success("CV importado, revisa los campos y ajusta lo que falte");
       navigate({ to: "/cv/$id", params: { id: cv.id } });
     } catch (err) {
       console.error(err);
