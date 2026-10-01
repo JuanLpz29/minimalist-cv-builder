@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, MoreHorizontal, Upload } from "lucide-react";
+import { Plus, Trash2, MoreHorizontal, Upload, FileText } from "lucide-react";
 import { localRepository } from "@/domain/cv/repository";
 import { appearanceForTemplate, EXAMPLE_CV_ID, exampleCV, newCV } from "@/domain/cv/defaults";
 import { importCvFromFile } from "@/domain/cv/import/fromFile";
@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { DonateCard } from "@/components/DonateLink";
 
 export const Route = createFileRoute("/")({ component: Dashboard });
 
@@ -102,8 +103,7 @@ function Dashboard() {
             Importa tu CV, edítalo y descárgalo en PDF
           </h1>
           <p className="mt-3 max-w-xl text-base text-neutral-500">
-            Sube tu CV en PDF o Word, o empieza desde el ejemplo. Gratis, sin tarjeta y sin cuenta:
-            tu CV no sale de tu navegador.
+            Sube tu CV en PDF o Word, o empieza desde el ejemplo. Gratis, sin tarjeta y sin cuenta.
           </p>
           <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
@@ -132,51 +132,55 @@ function Dashboard() {
           </div>
         </div>
 
-        <h2 className="mb-2 text-sm font-semibold text-neutral-500">Tus currículums</h2>
-
-        <ul className="divide-y divide-neutral-100 border-y border-neutral-100">
-          {cvs.map((cv) => (
-            <li key={cv.id} className="group flex items-center justify-between gap-2 py-4">
-              <Link
-                to="/cv/$id"
-                params={{ id: cv.id }}
-                className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4"
-              >
-                <div className="flex h-10 w-8 shrink-0 items-center justify-center rounded-sm border border-neutral-200 bg-white">
-                  <div className="h-1 w-4 rounded-full bg-neutral-300" />
-                </div>
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-medium">{cv.title}</div>
-                  <div className="truncate text-xs text-neutral-500">
-                    {cv.appearance.template === "classic" ? "Clásico" : "Minimal"} ·{" "}
-                    {cv.personal.fullName || "Sin nombre"}
-                    {cv.personal.title ? ` · ${cv.personal.title}` : ""} · Editado{" "}
-                    {new Date(cv.updatedAt).toLocaleDateString("es-CL")}
+        <section className="mb-6 rounded-xl border border-neutral-200 bg-white">
+          <h2 className="px-5 pt-4 pb-2 text-sm font-semibold">Tus currículums</h2>
+          {/* ponytail: ~5 CVs visibles, el resto con scroll; paginar si alguien junta cientos */}
+          <ul className="max-h-[23rem] divide-y divide-neutral-100 overflow-y-auto px-3 pb-2">
+            {cvs.map((cv) => (
+              <li key={cv.id} className="group flex items-center justify-between gap-2 px-2 py-3.5">
+                <Link
+                  to="/cv/$id"
+                  params={{ id: cv.id }}
+                  className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-500">
+                    <FileText className="h-4 w-4" />
                   </div>
-                </div>
-              </Link>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 shrink-0 text-neutral-500 sm:opacity-0 sm:group-hover:opacity-100"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => remove(cv.id)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" /> Eliminar
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </li>
-          ))}
-        </ul>
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium">{cv.title}</div>
+                    <div className="truncate text-xs text-neutral-500">
+                      {cv.appearance.template === "classic" ? "Clásico" : "Minimal"} ·{" "}
+                      {cv.personal.fullName || "Sin nombre"}
+                      {cv.personal.title ? ` · ${cv.personal.title}` : ""} · Editado{" "}
+                      {new Date(cv.updatedAt).toLocaleDateString("es-CL")}
+                    </div>
+                  </div>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 shrink-0 text-neutral-500 sm:opacity-0 sm:group-hover:opacity-100"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => remove(cv.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <DonateCard />
       </main>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
