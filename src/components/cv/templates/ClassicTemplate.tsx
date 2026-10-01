@@ -1,5 +1,5 @@
 import type { CV } from "@/domain/cv/types";
-import { defaultColors } from "@/domain/cv/defaults";
+import { defaultColors, sectionHasContent } from "@/domain/cv/defaults";
 import { ContactLine, PageShell, Photo, SectionBody } from "./shared";
 
 /**
@@ -41,11 +41,14 @@ export function ClassicTemplate({ cv }: { cv: CV }) {
       </header>
 
       {sections.map((section) => {
-        const empty =
-          section.kind === "entries" ? section.entries.length === 0 : !section.body.trim();
-        if (empty) return null;
+        const empty = !sectionHasContent(section);
+        // Con solo título se ve en la vista previa (para ver lo que armas), pero no se imprime.
+        if (empty && !section.title.trim()) return null;
         return (
-          <section key={section.id} className="cv-section mb-7">
+          <section
+            key={section.id}
+            className={`cv-section mb-7 ${empty ? "cv-section-empty" : ""}`}
+          >
             <h2
               className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3"
               style={{

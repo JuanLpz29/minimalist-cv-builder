@@ -162,8 +162,10 @@ body.dark {
     height: auto !important;
     overflow: visible !important;
   }
-  /* Evita el truco visibility+absolute que recorta a 1 hoja */
+  /* Evita el truco visibility+absolute que recorta a 1 hoja.
+     .cv-section-empty: sección con solo título; se ve en la vista previa pero no se imprime. */
   .no-print,
+  .cv-section-empty,
   [data-sonner-toaster] {
     display: none !important;
   }
