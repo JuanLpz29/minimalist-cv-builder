@@ -111,16 +111,47 @@ export function Photo({ src, atsMode }: { src?: string; atsMode: boolean }) {
   );
 }
 
+const URL_RE = /^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i;
+
+/** "https://www.linkedin.com/in/x/?a=1" → "linkedin.com/in/x". Devuelve null si no es URL. */
+function shortUrl(value: string): string | null {
+  const v = value.trim();
+  if (v.includes("@") || !URL_RE.test(v)) return null;
+  return v
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/[?#].*$/, "")
+    .replace(/\/+$/, "");
+}
+
 export function ContactLine({ bits }: { bits: string[] }) {
   if (!bits.length) return null;
+  // El separador va a la izquierda de cada ítem y el contenedor corre -ml-4 con overflow oculto:
+  // el "|" del primer ítem de cada línea queda fuera de vista, así no cuelga al hacer wrap.
   return (
-    <div className="text-[9.5pt] text-neutral-500 flex flex-wrap gap-x-0">
-      {bits.map((b, i) => (
-        <span key={i}>
-          {i > 0 && <span className="mx-1.5 text-neutral-300">|</span>}
-          {b}
-        </span>
-      ))}
+    <div className="overflow-hidden text-[9.5pt] text-neutral-500">
+      <div className="-ml-4 flex flex-wrap">
+        {bits.map((b, i) => {
+          const short = shortUrl(b);
+          return (
+            <span
+              key={i}
+              className="relative pl-4 before:absolute before:left-[0.4rem] before:text-neutral-300 before:content-['|']"
+            >
+              {short ? (
+                <a
+                  href={/^https?:\/\//i.test(b.trim()) ? b.trim() : `https://${b.trim()}`}
+                  className="text-inherit no-underline"
+                >
+                  {short}
+                </a>
+              ) : (
+                b
+              )}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }
