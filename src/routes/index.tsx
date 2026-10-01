@@ -98,38 +98,43 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-14">
-        <div className="mb-10 sm:mb-14">
-          <h1 className="max-w-2xl text-2xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Importa tu CV, edítalo y descárgalo en PDF
-          </h1>
-          <p className="mt-3 max-w-xl text-base text-neutral-500">
-            Sube tu CV en PDF o Word, o empieza desde el ejemplo. Gratis, sin tarjeta y sin cuenta.
-          </p>
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              className="hidden"
-              onChange={(e) => onImport(e.target.files?.[0])}
-            />
-            <Button
-              className="h-11 w-full gap-1.5 px-5 sm:w-auto"
-              disabled={importing}
-              onClick={() => fileRef.current?.click()}
-            >
-              <Upload className="h-4 w-4" />
-              {importing ? "Importando…" : "Importar mi CV (PDF o Word)"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={openCreate}
-              className="h-11 w-full gap-1.5 sm:w-auto"
-            >
-              <Plus className="h-4 w-4" />
-              Empezar en blanco
-            </Button>
+        <div className="mb-10 flex items-center gap-10 sm:mb-14">
+          <div className="min-w-0 flex-1">
+            <h1 className="max-w-2xl text-2xl font-semibold tracking-tight text-balance sm:text-4xl">
+              Importa tu CV, edítalo y descárgalo en PDF
+            </h1>
+            <p className="mt-3 max-w-xl text-base text-neutral-500">
+              Sube tu CV en PDF o Word, o empieza desde el ejemplo. Gratis, sin tarjeta y sin
+              cuenta.
+            </p>
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                className="hidden"
+                onChange={(e) => onImport(e.target.files?.[0])}
+              />
+              <Button
+                className="h-11 w-full gap-1.5 px-5 sm:w-auto"
+                disabled={importing}
+                onClick={() => fileRef.current?.click()}
+              >
+                <Upload className="h-4 w-4" />
+                {importing ? "Importando…" : "Importar mi CV (PDF o Word)"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={openCreate}
+                className="h-11 w-full gap-1.5 sm:w-auto"
+              >
+                <Plus className="h-4 w-4" />
+                Empezar en blanco
+              </Button>
+            </div>
           </div>
+          {/* Misma hoja que la imagen para compartir (public/og.png); solo decora en pantallas grandes. */}
+          <img src="/cv-ilustracion.svg" alt="" className="hidden w-56 shrink-0 lg:block xl:w-64" />
         </div>
 
         <section className="mb-6 rounded-xl border border-neutral-200 bg-white">
