@@ -1,4 +1,4 @@
-# Mitrilo CV / Minimalist CV Builder
+# Vitae Builder
 
 Editor de currículums: importá PDF/DOCX, editá secciones libres, toggle ES/EN, plantillas Minimal o Classic, exportá a PDF.
 
