@@ -57,7 +57,7 @@ export function SectionBody({ section }: { section: CVSection }) {
           if (idx > 0 && idx < 40) {
             return (
               <div key={i} className="cv-entry-block">
-                <div className="font-medium" style={{ color: section.subtitleColor }}>
+                <div className="font-semibold" style={{ color: section.subtitleColor }}>
                   {line.slice(0, idx)}
                 </div>
                 <div className="text-neutral-700 mt-0.5">{line.slice(idx + 1).trim()}</div>
