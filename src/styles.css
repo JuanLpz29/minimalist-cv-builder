@@ -149,9 +149,10 @@ body.dark {
 }
 
 @media print {
+  /* El margen de página lo inyecta cv.$id.tsx con el valor de Estilo → Margen, así se repite
+     en cada hoja. Si fuera padding de .cv-page, solo tendría margen arriba de la 1ª y abajo de la última. */
   @page {
     size: A4;
-    margin: 0;
   }
   html,
   body {
@@ -178,14 +179,20 @@ body.dark {
   .cv-page {
     box-shadow: none !important;
     margin: 0 auto !important;
-    width: 210mm !important;
+    width: auto !important;
     min-height: 0 !important;
     height: auto !important;
+    padding: 0 !important;
   }
-  .cv-section,
+  /* Cortar entre entradas, nunca dentro de una; y que un título no quede solo al pie de la hoja.
+     Las secciones enteras sí pueden partirse: si no, saltan completas y dejan media hoja en blanco. */
   .cv-entry-block {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+  .cv-section > h2 {
+    break-after: avoid;
+    page-break-after: avoid;
   }
 }
 

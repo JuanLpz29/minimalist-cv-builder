@@ -240,6 +240,7 @@ function EditorPage() {
 
       {/* Fuera del layout (hidden/scale) — si no, el PDF sale en blanco */}
       <div id="print-root" className="print-only">
+        <style>{`@page { size: A4; margin: ${cv.appearance.margin}mm; }`}</style>
         <CVPreview cv={cv} />
       </div>
     </div>
