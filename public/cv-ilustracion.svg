@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 510" role="img" aria-label="Ilustración de un currículum">
+  <g transform="translate(30 8) rotate(3)">
+    <rect x="6" y="10" width="330" height="466" rx="10" fill="#e5e5e5"/>
+    <rect width="330" height="466" rx="10" fill="#fff" stroke="#e5e5e5" stroke-width="2"/>
+    <rect x="32" y="36" width="170" height="16" rx="4" fill="#171717"/>
+    <rect x="32" y="62" width="110" height="9" rx="3" fill="#a3a3a3"/>
+    <rect x="32" y="90" width="266" height="2" fill="#171717"/>
+    <g fill="#d4d4d4">
+      <rect x="32" y="112" width="90" height="10" rx="3" fill="#525252"/>
+      <rect x="32" y="134" width="266" height="7" rx="3"/><rect x="32" y="150" width="240" height="7" rx="3"/><rect x="32" y="166" width="200" height="7" rx="3"/>
+      <rect x="32" y="198" width="110" height="10" rx="3" fill="#525252"/>
+      <rect x="32" y="220" width="266" height="7" rx="3"/><rect x="32" y="236" width="250" height="7" rx="3"/><rect x="32" y="252" width="220" height="7" rx="3"/>
+      <rect x="32" y="276" width="266" height="7" rx="3"/><rect x="32" y="292" width="180" height="7" rx="3"/>
+      <rect x="32" y="324" width="80" height="10" rx="3" fill="#525252"/>
+      <rect x="32" y="346" width="266" height="7" rx="3"/><rect x="32" y="362" width="230" height="7" rx="3"/>
+      <rect x="32" y="394" width="70" height="10" rx="3" fill="#525252"/>
+      <rect x="32" y="416" width="60" height="18" rx="9"/><rect x="100" y="416" width="74" height="18" rx="9"/><rect x="182" y="416" width="54" height="18" rx="9"/>
+    </g>
+  </g>
+</svg>
