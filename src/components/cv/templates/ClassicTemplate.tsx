@@ -1,4 +1,5 @@
 import type { CV } from "@/domain/cv/types";
+import { defaultColors } from "@/domain/cv/defaults";
 import { ContactLine, PageShell, Photo, SectionBody } from "./shared";
 
 /**
@@ -47,7 +48,14 @@ export function ClassicTemplate({ cv }: { cv: CV }) {
           <section key={section.id} className="cv-section mb-7">
             <h2
               className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3"
-              style={{ color: section.titleColor || accent }}
+              style={{
+                // ponytail: el negro por defecto cuenta como "sin elegir" y toma el color del nombre;
+                // si alguien elige justo #111111 en Clásico verá el acento. Separar "vacío" de "negro" si molesta.
+                color:
+                  section.titleColor && section.titleColor !== defaultColors.sectionTitle
+                    ? section.titleColor
+                    : accent,
+              }}
             >
               {section.title}
             </h2>
