@@ -374,7 +374,7 @@ export function CVEditor({ cv, update }: Props) {
             <div className="text-xs text-neutral-500">
               <button
                 type="button"
-                className="underline"
+                className="min-h-10 underline md:min-h-0"
                 onClick={() =>
                   update((p) => ({ ...p, personal: { ...p.personal, photoDataUrl: undefined } }))
                 }
