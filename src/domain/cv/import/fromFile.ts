@@ -1,11 +1,46 @@
-import * as pdfjs from "pdfjs-dist";
+import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 import mammoth from "mammoth";
 import { parseCvText } from "./parseCvText";
 import type { CV } from "../types";
 
+// Safari/iOS gaps that pdf.js relies on: ReadableStream async iteration
+// (all Safari) and Promise.withResolvers (iOS < 17.4).
+function ensurePolyfills() {
+  const RS = globalThis.ReadableStream as
+    | (typeof ReadableStream & { prototype: any })
+    | undefined;
+  if (RS && !RS.prototype[Symbol.asyncIterator]) {
+    RS.prototype[Symbol.asyncIterator] = async function* (this: ReadableStream) {
+      const reader = this.getReader();
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) return;
+          yield value;
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    };
+    RS.prototype.values = RS.prototype[Symbol.asyncIterator];
+  }
+  if (!(Promise as any).withResolvers) {
+    (Promise as any).withResolvers = function () {
+      let resolve!: (v?: unknown) => void;
+      let reject!: (e?: unknown) => void;
+      const promise = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    };
+  }
+}
+ensurePolyfills();
+
 // Vite resolves the worker as a separate asset URL.
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
+  "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
   import.meta.url,
 ).toString();
 
