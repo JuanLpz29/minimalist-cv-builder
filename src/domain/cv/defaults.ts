@@ -502,3 +502,13 @@ export function migrateCV(raw: unknown): CV {
     },
   };
 }
+
+export const entryHasContent = (e: SectionEntry) =>
+  Boolean(e.heading.trim() || e.subheading.trim() || e.meta.trim() || e.body.trim());
+
+/** ¿La sección tiene algo que imprimir además del título? */
+export function sectionHasContent(section: CVSection): boolean {
+  return section.kind === "entries"
+    ? section.entries.some(entryHasContent)
+    : Boolean(section.body.trim());
+}

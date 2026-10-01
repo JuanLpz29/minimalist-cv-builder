@@ -1,4 +1,5 @@
 import type { CV, CVSection } from "@/domain/cv/types";
+import { entryHasContent } from "@/domain/cv/defaults";
 
 function BulletList({ body, marker = "•" }: { body: string; marker?: string }) {
   const lines = body
@@ -22,14 +23,16 @@ export function SectionBody({ section }: { section: CVSection }) {
   if (section.kind === "entries") {
     return (
       <div className="space-y-5">
-        {section.entries.map((e) => (
+        {section.entries.filter(entryHasContent).map((e) => (
           <div key={e.id} className="cv-entry-block">
-            <div
-              className="font-semibold uppercase tracking-wide text-[0.95em] min-w-0"
-              style={{ color: section.subtitleColor }}
-            >
-              {[e.heading, e.subheading, e.meta].filter(Boolean).join(" | ") || "—"}
-            </div>
+            {(e.heading || e.subheading || e.meta) && (
+              <div
+                className="font-semibold uppercase tracking-wide text-[0.95em] min-w-0"
+                style={{ color: section.subtitleColor }}
+              >
+                {[e.heading, e.subheading, e.meta].filter(Boolean).join(" | ")}
+              </div>
+            )}
             {e.body &&
               (e.bodyFormat === "text" ? (
                 <div className="mt-1.5 whitespace-pre-wrap text-neutral-700">{e.body}</div>
