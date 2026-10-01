@@ -64,7 +64,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "color-scheme", content: "light only" },
       { name: "theme-color", content: "#ffffff" },
-      { title: "Vitae Builder — Editor de currículums" },
+      { title: "Vitae Builder | Editor de currículums" },
       {
         name: "description",
         content: "Importa PDF/DOCX, edita secciones y exporta tu CV a PDF.",
