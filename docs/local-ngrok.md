@@ -34,7 +34,7 @@ El visitante puede ver una pantalla intermedia “Visit Site” de ngrok: es nor
 
 | Tema | Qué pasa |
 |------|----------|
-| Datos | Cada browser guarda CVs en su propio `localStorage`. Vos y tu amigo **no comparten** el mismo CV. |
+| Datos | Cada browser guarda CVs en su propio `localStorage`. Con tu amigo **no comparten ni verán** el mismo CV. |
 | Auth | No hay login. Cualquiera con el link entra. |
 | AI | Los botones Improve/Generate son stub local (no llaman API). |
 | Túnel | Al cerrar la laptop o matar `dev`/`ngrok`, el link muere. |
