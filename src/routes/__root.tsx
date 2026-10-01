@@ -55,6 +55,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 // LinkedIn y otros solo leen og:image con URL absoluta. Netlify inyecta $URL en el build (netlify.toml).
+// LinkedIn pide una descripción de al menos 100 caracteres.
+const DESCRIPTION =
+  "Importa tu CV en PDF o Word, edítalo por secciones, elige un diseño apto para ATS y descárgalo en PDF. Gratis, sin tarjeta y sin cuenta.";
+
 const SITE_URL = import.meta.env.VITE_SITE_URL ?? "";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -67,12 +71,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Vitae Builder | Editor de currículums" },
       {
         name: "description",
-        content: "Importa PDF/DOCX, edita secciones y exporta tu CV a PDF.",
+        content: DESCRIPTION,
       },
       { property: "og:title", content: "Vitae Builder" },
       {
         property: "og:description",
-        content: "Importa tu CV, edítalo y descárgalo en PDF. Gratis, sin tarjeta y sin cuenta.",
+        content: DESCRIPTION,
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: `${SITE_URL}/` },
