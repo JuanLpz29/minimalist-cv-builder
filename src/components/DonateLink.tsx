@@ -1,4 +1,4 @@
-import { Heart, Link2 } from "lucide-react";
+import { Heart } from "lucide-react";
 
 // Donación voluntaria (Mercado Pago, monto libre). Nunca bloquea ni condiciona la descarga.
 const DONATE_URL = "https://link.mercadopago.cl/vitaebuilder";
@@ -30,10 +30,9 @@ export function DonateCard() {
         href={DONATE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-blue-600 px-6 text-sm font-medium text-white hover:bg-blue-700"
+        className="inline-flex h-11 items-center justify-center rounded-full bg-blue-600 px-6 text-sm font-medium text-white hover:bg-blue-700"
       >
-        <Link2 className="h-4 w-4" aria-hidden />
-        Donar
+        Ir a Donar
       </a>
     </div>
   );
