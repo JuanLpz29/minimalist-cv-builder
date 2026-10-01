@@ -91,7 +91,7 @@ function Dashboard() {
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
             <img src="/favicon.svg" alt="" className="h-5 w-5" />
-            <span className="text-sm font-semibold tracking-tight">CV Builder</span>
+            <span className="text-sm font-semibold tracking-tight">Vitae Builder</span>
           </div>
         </div>
       </header>
