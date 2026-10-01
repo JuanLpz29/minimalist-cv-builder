@@ -16,7 +16,9 @@ export function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">{label}</Label>
+      <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">
+        {label}
+      </Label>
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}

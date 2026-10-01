@@ -85,12 +85,7 @@ export interface CV {
 
 /** @deprecated solo para migrate() de localStorage viejo */
 export type SectionKey =
-  | "summary"
-  | "experience"
-  | "education"
-  | "projects"
-  | "skills"
-  | "certifications";
+  "summary" | "experience" | "education" | "projects" | "skills" | "certifications";
 
 export const DEFAULT_SECTION_ORDER: SectionKey[] = [
   "summary",

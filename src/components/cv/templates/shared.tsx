@@ -1,12 +1,6 @@
 import type { CV, CVSection } from "@/domain/cv/types";
 
-function BulletList({
-  body,
-  marker = "•",
-}: {
-  body: string;
-  marker?: string;
-}) {
+function BulletList({ body, marker = "•" }: { body: string; marker?: string }) {
   const lines = body
     .split("\n")
     .map((l) => l.replace(/^[-•●▪◦*]+\s*/, "").trim())
@@ -49,7 +43,10 @@ export function SectionBody({ section }: { section: CVSection }) {
   }
 
   if (section.kind === "tags") {
-    const lines = section.body.split("\n").map((l) => l.trim()).filter(Boolean);
+    const lines = section.body
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
     return (
       <div className="space-y-2">
         {lines.map((line, i) => {
@@ -85,13 +82,7 @@ export function SectionBody({ section }: { section: CVSection }) {
   );
 }
 
-export function PageShell({
-  cv,
-  children,
-}: {
-  cv: CV;
-  children: React.ReactNode;
-}) {
+export function PageShell({ cv, children }: { cv: CV; children: React.ReactNode }) {
   const { appearance } = cv;
   return (
     <div

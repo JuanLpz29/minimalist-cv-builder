@@ -131,10 +131,10 @@ export const samplePersonal = (locale: Locale = "es"): PersonalInfo =>
 export const sampleSections = (locale: Locale = "es"): CVSection[] => {
   if (locale === "en") {
     return [
-    {
-      ...newSection("Professional summary", "text", undefined, "text"),
-      body: "Product designer with 6+ years shipping B2B and consumer experiences. I turn fuzzy problems into clear interfaces, partner closely with eng and research, and care about measurable outcomes—not just pretty screens.",
-    },
+      {
+        ...newSection("Professional summary", "text", undefined, "text"),
+        body: "Product designer with 6+ years shipping B2B and consumer experiences. I turn fuzzy problems into clear interfaces, partner closely with eng and research, and care about measurable outcomes—not just pretty screens.",
+      },
       {
         ...newSection("Experience", "entries"),
         entries: [
@@ -242,7 +242,11 @@ export const exampleCV = (template: TemplateId = "minimal"): CV => {
   };
 };
 
-export const newCV = (title = "Untitled CV", locale: Locale = "es", template: TemplateId = "minimal"): CV => {
+export const newCV = (
+  title = "Untitled CV",
+  locale: Locale = "es",
+  template: TemplateId = "minimal",
+): CV => {
   const now = Date.now();
   return {
     id: uid(),
@@ -316,8 +320,7 @@ export function migrateCV(raw: unknown): CV {
   const r = raw as Record<string, unknown>;
   if (r && Array.isArray(r.sections)) {
     const cv = r as unknown as CV;
-    const template =
-      cv.appearance?.template === "classic" ? "classic" : "minimal";
+    const template = cv.appearance?.template === "classic" ? "classic" : "minimal";
     return {
       ...newCV(cv.title || "Untitled CV", cv.locale || "es"),
       ...cv,
@@ -325,7 +328,12 @@ export function migrateCV(raw: unknown): CV {
       personal: { ...emptyPersonal(), ...cv.personal },
       appearance: { ...defaultAppearance(), ...cv.appearance, template },
       sections: (cv.sections ?? []).map((s) => ({
-        ...newSection(s.title || "Section", s.kind || "text", undefined, s.bodyFormat === "bullets" ? "bullets" : "text"),
+        ...newSection(
+          s.title || "Section",
+          s.kind || "text",
+          undefined,
+          s.bodyFormat === "bullets" ? "bullets" : "text",
+        ),
         ...s,
         entries: (s.entries ?? []).map((e) => ({
           ...newEntry(),
@@ -334,11 +342,7 @@ export function migrateCV(raw: unknown): CV {
         })),
         body: s.body ?? "",
         bodyFormat:
-          s.kind === "text"
-            ? s.bodyFormat === "bullets"
-              ? "bullets"
-              : "text"
-            : s.bodyFormat,
+          s.kind === "text" ? (s.bodyFormat === "bullets" ? "bullets" : "text") : s.bodyFormat,
         titleColor: s.titleColor || defaultColors.sectionTitle,
         subtitleColor: s.subtitleColor || defaultColors.subtitle,
       })),
@@ -490,10 +494,7 @@ export function migrateCV(raw: unknown): CV {
     updatedAt: legacy.updatedAt || now,
     locale: detectLocale(blob),
     personal: { ...emptyPersonal(), ...legacy.personal },
-    sections:
-      sections.length > 0
-        ? sections
-        : defaultSections(detectLocale(blob)),
+    sections: sections.length > 0 ? sections : defaultSections(detectLocale(blob)),
     appearance: {
       ...defaultAppearance(),
       ...legacy.appearance,
