@@ -14,7 +14,6 @@ import {
   Pencil,
 } from "lucide-react";
 import { useCV } from "@/hooks/useCV";
-import { toast } from "sonner";
 import { DonateLink } from "@/components/DonateLink";
 import { CVEditor } from "@/components/cv/editor/CVEditor";
 import { CVPreview } from "@/components/cv/CVPreview";
@@ -25,16 +24,6 @@ const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 1.5;
 const ZOOM_STEP = 0.1;
 const A4_WIDTH_PX = 794;
-
-// La URL, fecha y "Página 1 de 1" las agrega el navegador (Safari: casilla del diálogo); CSS no las puede quitar.
-function printCV() {
-  toast(
-    "En el diálogo de impresión desmarca «Encabezados y pies de página» para que no salga la URL ni la fecha.",
-    { id: "print-hint", duration: 10000 },
-  );
-  // Dejar que el aviso se pinte antes de que el diálogo bloquee la página.
-  setTimeout(() => window.print(), 300);
-}
 
 function EditorPage() {
   const { id } = Route.useParams();
@@ -72,7 +61,7 @@ function EditorPage() {
       }
       if (mod && e.key === "p") {
         e.preventDefault();
-        printCV();
+        window.print();
       }
       if (mod && (e.key === "=" || e.key === "+")) {
         e.preventDefault();
@@ -183,7 +172,10 @@ function EditorPage() {
         >
           <Redo2 className="h-4 w-4" />
         </Button>
-        <Button className="h-10 shrink-0 gap-1.5 px-3 text-xs sm:h-8 sm:text-sm" onClick={printCV}>
+        <Button
+          className="h-10 shrink-0 gap-1.5 px-3 text-xs sm:h-8 sm:text-sm"
+          onClick={() => window.print()}
+        >
           <Download className="h-3.5 w-3.5" />
           <span className="hidden xs:inline sm:inline">PDF</span>
         </Button>
@@ -234,6 +226,12 @@ function EditorPage() {
             mobileTab === "preview" ? "block" : "hidden lg:block"
           }`}
         >
+          {/* La URL, fecha y "Página 1 de 1" las agrega el navegador según una casilla del diálogo;
+              el CSS no puede desmarcarla, así que se avisa acá (fuera de lo que se imprime). */}
+          <p className="mx-3 mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900 sm:mx-6">
+            Al descargar el PDF, desmarca «Encabezados y pies de página» en el diálogo de impresión
+            para que no salga la URL ni la fecha.
+          </p>
           <div className="flex justify-center px-3 py-6 sm:px-6 sm:py-10">
             <div className="origin-top" style={{ transform: `scale(${previewScale})` }}>
               <CVPreview cv={cv} />
