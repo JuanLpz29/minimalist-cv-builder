@@ -188,3 +188,12 @@ body.dark {
     page-break-inside: avoid;
   }
 }
+
+/* iOS Safari hace zoom al enfocar campos con letra < 16px. Fuera de @layer para ganarle a text-sm. */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}

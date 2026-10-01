@@ -23,7 +23,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Trash2, Plus, GripVertical, ImagePlus, ChevronRight } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  GripVertical,
+  ImagePlus,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 
 interface Props {
   cv: CV;
@@ -35,7 +43,10 @@ const areaCls =
 
 const labelCls = "text-[11px] font-medium text-neutral-500 uppercase tracking-wide";
 const summaryCls =
-  "flex w-fit cursor-pointer list-none items-center gap-1 text-xs font-medium text-neutral-500 hover:text-neutral-900 [&::-webkit-details-marker]:hidden";
+  "flex min-h-11 w-fit cursor-pointer list-none items-center gap-1 text-xs font-medium text-neutral-500 hover:text-neutral-900 [&::-webkit-details-marker]:hidden";
+
+const moveBtnCls =
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-30 md:h-8 md:w-8";
 
 const SECTION_KINDS: [SectionKind, string][] = [
   ["text", "Texto (perfil, resumen…)"],
@@ -172,7 +183,7 @@ function BodyFormatEditor({
         <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">
           Descripción
         </Label>
-        <div className="flex items-center gap-2">
+        <label className="flex min-h-10 cursor-pointer items-center gap-2">
           <span
             className={`text-xs ${isText ? "text-neutral-400" : "text-foreground font-medium"}`}
           >
@@ -192,7 +203,7 @@ function BodyFormatEditor({
           >
             Texto
           </span>
-        </div>
+        </label>
       </div>
 
       {isText ? (
@@ -230,7 +241,7 @@ function BodyFormatEditor({
                 type="button"
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 shrink-0 text-neutral-400"
+                className="h-10 w-10 shrink-0 text-neutral-400 md:h-8 md:w-8"
                 disabled={arr.length <= 1 && !line.trim()}
                 onClick={() => {
                   const lines = body.split("\n").filter((_, i) => i !== idx);
@@ -245,7 +256,7 @@ function BodyFormatEditor({
             type="button"
             size="sm"
             variant="ghost"
-            className="h-7 text-xs gap-1"
+            className="h-10 gap-1 text-xs md:h-7"
             onClick={() => {
               const lines = body === "" ? [""] : body.split("\n");
               lines.push("");
@@ -273,6 +284,14 @@ export function CVEditor({ cv, update }: Props) {
       newSection("Nueva sección", kind, undefined, kind === "text" ? "bullets" : undefined),
     ]);
 
+  const move = (index: number, delta: number) => {
+    const to = index + delta;
+    if (to < 0 || to >= cv.sections.length) return;
+    const list = [...cv.sections];
+    [list[index], list[to]] = [list[to], list[index]];
+    setSections(list);
+  };
+
   const onDrop = (targetId: string) => {
     if (!dragId || dragId === targetId) return;
     const list = [...cv.sections];
@@ -287,9 +306,13 @@ export function CVEditor({ cv, update }: Props) {
 
   return (
     <Tabs defaultValue="content">
-      <TabsList className="sticky top-0 z-10 mt-4 grid w-full grid-cols-2">
-        <TabsTrigger value="content">Contenido</TabsTrigger>
-        <TabsTrigger value="style">Estilo</TabsTrigger>
+      <TabsList className="sticky top-0 z-10 mt-4 grid h-11 w-full grid-cols-2 md:h-9">
+        <TabsTrigger value="content" className="h-full">
+          Contenido
+        </TabsTrigger>
+        <TabsTrigger value="style" className="h-full">
+          Estilo
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="content" className="mt-0">
@@ -369,7 +392,7 @@ export function CVEditor({ cv, update }: Props) {
         </Group>
 
         <Group title="Secciones">
-          {cv.sections.map((section) => (
+          {cv.sections.map((section, index) => (
             <details
               key={section.id}
               draggable
@@ -378,15 +401,41 @@ export function CVEditor({ cv, update }: Props) {
               onDrop={() => onDrop(section.id)}
               className={`group rounded-lg border border-neutral-200 bg-white ${dragId === section.id ? "opacity-60" : ""}`}
             >
-              <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 [&::-webkit-details-marker]:hidden">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 py-1 pl-3 pr-2 [&::-webkit-details-marker]:hidden">
                 <GripVertical
-                  className="h-4 w-4 shrink-0 cursor-grab text-neutral-300 active:cursor-grabbing"
+                  className="hidden h-4 w-4 shrink-0 cursor-grab text-neutral-300 active:cursor-grabbing md:block"
                   aria-label="Arrastrar para reordenar"
                 />
-                <span className="flex-1 truncate text-sm font-medium">
-                  {section.title || "Sin título"}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium">
+                    {section.title || "Sin título"}
+                  </span>
+                  <span className="block text-xs text-neutral-400">{sectionHint(section)}</span>
                 </span>
-                <span className="text-xs text-neutral-400">{sectionHint(section)}</span>
+                <button
+                  type="button"
+                  aria-label="Subir sección"
+                  disabled={index === 0}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    move(index, -1);
+                  }}
+                  className={moveBtnCls}
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Bajar sección"
+                  disabled={index === cv.sections.length - 1}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    move(index, 1);
+                  }}
+                  className={moveBtnCls}
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </button>
                 <ChevronRight className="h-4 w-4 shrink-0 text-neutral-400 transition-transform group-open:rotate-90" />
               </summary>
 
@@ -421,7 +470,7 @@ export function CVEditor({ cv, update }: Props) {
                         key={entry.id}
                         className="group/entry rounded-md border border-neutral-100"
                       >
-                        <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 [&::-webkit-details-marker]:hidden">
+                        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 py-2 [&::-webkit-details-marker]:hidden">
                           <ChevronRight className="h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform group-open/entry:rotate-90" />
                           <span className="flex-1 truncate text-sm">
                             {[entry.heading, entry.subheading].filter(Boolean).join(" · ") ||
@@ -473,7 +522,7 @@ export function CVEditor({ cv, update }: Props) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-7 gap-1 text-xs text-neutral-500 hover:text-destructive"
+                            className="h-10 gap-1 text-xs text-neutral-500 hover:text-destructive md:h-7"
                             onClick={() =>
                               setSections(
                                 cv.sections.map((s) =>
@@ -492,7 +541,7 @@ export function CVEditor({ cv, update }: Props) {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-8"
+                      className="h-10 md:h-8"
                       onClick={() =>
                         setSections(
                           cv.sections.map((s) =>
@@ -558,7 +607,7 @@ export function CVEditor({ cv, update }: Props) {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="mt-3 h-8 gap-1 text-xs text-neutral-500 hover:text-destructive"
+                    className="mt-3 h-10 gap-1 text-xs text-neutral-500 hover:text-destructive md:h-8"
                     onClick={() => setSections(cv.sections.filter((s) => s.id !== section.id))}
                   >
                     <Trash2 className="h-3.5 w-3.5" /> Eliminar sección

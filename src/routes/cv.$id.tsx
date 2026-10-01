@@ -2,7 +2,17 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Download, Undo2, Redo2, Check, ZoomIn, ZoomOut, Eye, Pencil } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  Undo2,
+  Redo2,
+  Check,
+  ZoomIn,
+  ZoomOut,
+  Eye,
+  Pencil,
+} from "lucide-react";
 import { useCV } from "@/hooks/useCV";
 import { CVEditor } from "@/components/cv/editor/CVEditor";
 import { CVPreview } from "@/components/cv/CVPreview";
@@ -12,6 +22,7 @@ export const Route = createFileRoute("/cv/$id")({ component: EditorPage });
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 1.5;
 const ZOOM_STEP = 0.1;
+const A4_WIDTH_PX = 794;
 
 function EditorPage() {
   const { id } = Route.useParams();
@@ -22,7 +33,11 @@ function EditorPage() {
   const [previewScale, setPreviewScale] = useState(0.7);
 
   useEffect(() => {
-    const sync = () => setPreviewScale(window.innerWidth < 1024 ? Math.min(zoom, 0.52) : zoom);
+    // Hoja A4 = 794px; en celular se ajusta al ancho de pantalla menos el padding (px-3 = 24px).
+    const sync = () =>
+      setPreviewScale(
+        window.innerWidth < 1024 ? Math.min(zoom, (window.innerWidth - 24) / A4_WIDTH_PX) : zoom,
+      );
     sync();
     window.addEventListener("resize", sync);
     return () => window.removeEventListener("resize", sync);
@@ -105,7 +120,9 @@ function EditorPage() {
             size="icon"
             className="h-7 w-7"
             disabled={zoom <= ZOOM_MIN}
-            onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))}
+            onClick={() =>
+              setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))
+            }
             title="Alejar"
           >
             <ZoomOut className="h-3.5 w-3.5" />
@@ -123,7 +140,9 @@ function EditorPage() {
             size="icon"
             className="h-7 w-7"
             disabled={zoom >= ZOOM_MAX}
-            onClick={() => setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 10) / 10))}
+            onClick={() =>
+              setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 10) / 10))
+            }
             title="Acercar"
           >
             <ZoomIn className="h-3.5 w-3.5" />
@@ -150,7 +169,10 @@ function EditorPage() {
         >
           <Redo2 className="h-4 w-4" />
         </Button>
-        <Button className="h-8 shrink-0 gap-1.5 px-2.5 text-xs sm:px-3 sm:text-sm" onClick={() => window.print()}>
+        <Button
+          className="h-10 shrink-0 gap-1.5 px-3 text-xs sm:h-8 sm:text-sm"
+          onClick={() => window.print()}
+        >
           <Download className="h-3.5 w-3.5" />
           <span className="hidden xs:inline sm:inline">PDF</span>
         </Button>
@@ -161,7 +183,9 @@ function EditorPage() {
         <button
           type="button"
           className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-sm font-medium ${
-            mobileTab === "edit" ? "border-b-2 border-neutral-900 text-neutral-900" : "text-neutral-400"
+            mobileTab === "edit"
+              ? "border-b-2 border-neutral-900 text-neutral-900"
+              : "text-neutral-400"
           }`}
           onClick={() => setMobileTab("edit")}
         >
@@ -170,7 +194,9 @@ function EditorPage() {
         <button
           type="button"
           className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-sm font-medium ${
-            mobileTab === "preview" ? "border-b-2 border-neutral-900 text-neutral-900" : "text-neutral-400"
+            mobileTab === "preview"
+              ? "border-b-2 border-neutral-900 text-neutral-900"
+              : "text-neutral-400"
           }`}
           onClick={() => setMobileTab("preview")}
         >
