@@ -480,6 +480,19 @@ export function CVEditor({ cv, update }: Props) {
                       <span className="font-medium text-neutral-700">Lenguajes: Python, SQL</span>.
                       Lo que va antes de los dos puntos sale en negrita.
                     </p>
+                    <label className="flex min-h-10 cursor-pointer items-center gap-2 text-xs text-neutral-700">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-neutral-900"
+                        checked={Boolean(section.tagsInline)}
+                        onChange={(e) =>
+                          setSections(
+                            patchSection(cv.sections, section.id, { tagsInline: e.target.checked }),
+                          )
+                        }
+                      />
+                      Nombre y contenido en la misma línea
+                    </label>
                   </div>
                 ) : section.kind === "text" ? (
                   <BodyFormatEditor

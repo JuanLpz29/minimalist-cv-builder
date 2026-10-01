@@ -54,6 +54,16 @@ export function SectionBody({ section }: { section: CVSection }) {
       <div className="space-y-2">
         {lines.map((line, i) => {
           const idx = line.indexOf(":");
+          if (idx > 0 && idx < 40 && section.tagsInline) {
+            return (
+              <div key={i} className="cv-entry-block text-neutral-700">
+                <span className="font-semibold" style={{ color: section.subtitleColor }}>
+                  {line.slice(0, idx + 1)}
+                </span>{" "}
+                {line.slice(idx + 1).trim()}
+              </div>
+            );
+          }
           if (idx > 0 && idx < 40) {
             return (
               <div key={i} className="cv-entry-block">
