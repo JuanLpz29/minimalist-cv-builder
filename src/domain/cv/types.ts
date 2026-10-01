@@ -51,14 +51,22 @@ export const TEMPLATE_OPTIONS: { id: TemplateId; label: string; hint: string }[]
   { id: "classic", label: "Clásico", hint: "Nombre + raya (estilo tipográfico)" },
 ];
 
+/** Fuente subida por el usuario, guardada como data URL junto al CV. */
+export interface CustomFont {
+  name: string;
+  dataUrl: string;
+}
+
 export interface Appearance {
   template: TemplateId;
-  font: FontFamily;
+  /** "custom" = usa `customFont` */
+  font: FontFamily | "custom";
+  customFont?: CustomFont;
   fontSize: number;
   spacing: number;
-  accentColor: string;
   nameColor: string;
   titleColor: string;
+  contactColor: string;
   margin: number;
   /** Oculta fotos/imágenes (ATS-friendly) */
   atsMode: boolean;

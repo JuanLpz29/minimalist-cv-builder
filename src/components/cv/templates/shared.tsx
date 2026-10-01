@@ -82,19 +82,30 @@ export function SectionBody({ section }: { section: CVSection }) {
   );
 }
 
+const CUSTOM_FONT_FAMILY = "CV Custom Font";
+
 export function PageShell({ cv, children }: { cv: CV; children: React.ReactNode }) {
   const { appearance } = cv;
+  const custom = appearance.font === "custom" ? appearance.customFont : undefined;
+  const family = custom
+    ? CUSTOM_FONT_FAMILY
+    : appearance.font === "custom"
+      ? "Inter"
+      : appearance.font;
   return (
     <div
       className="cv-page shadow-page mx-auto"
       style={{
         padding: `${appearance.margin}mm`,
-        fontFamily: `"${appearance.font}", ui-sans-serif, system-ui, sans-serif`,
+        fontFamily: `"${family}", ui-sans-serif, system-ui, sans-serif`,
         fontSize: `${appearance.fontSize}pt`,
         lineHeight: appearance.spacing,
         color: "#111",
       }}
     >
+      {custom && (
+        <style>{`@font-face { font-family: "${CUSTOM_FONT_FAMILY}"; src: url(${custom.dataUrl}); }`}</style>
+      )}
       {children}
     </div>
   );
@@ -124,12 +135,15 @@ function shortUrl(value: string): string | null {
     .replace(/\/+$/, "");
 }
 
-export function ContactLine({ bits }: { bits: string[] }) {
+export function ContactLine({ bits, color }: { bits: string[]; color?: string }) {
   if (!bits.length) return null;
   // El separador va a la izquierda de cada ítem y el contenedor corre -ml-4 con overflow oculto:
   // el "|" del primer ítem de cada línea queda fuera de vista, así no cuelga al hacer wrap.
   return (
-    <div className="overflow-hidden text-[9.5pt] text-neutral-500">
+    <div
+      className="overflow-hidden text-[9.5pt] text-neutral-500"
+      style={{ color: color || undefined }}
+    >
       <div className="-ml-4 flex flex-wrap">
         {bits.map((b, i) => {
           const short = shortUrl(b);
