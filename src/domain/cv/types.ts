@@ -78,7 +78,7 @@ export interface CV {
   locale: Locale;
   personal: PersonalInfo;
   sections: CVSection[];
-  /** Contenido del otro idioma (se crea la 1ª vez que cambiás el toggle) */
+  /** Contenido del otro idioma (se crea la 1ª vez que cambias el toggle) */
   otherLocale?: LocaleBundle;
   appearance: Appearance;
 }

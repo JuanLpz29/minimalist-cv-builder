@@ -239,7 +239,7 @@ export function CVEditor({ cv, update }: Props) {
           <div>
             <div className="text-sm font-medium">Versión del CV</div>
             <div className="text-xs text-neutral-500">
-              ES y EN son independientes. La primera vez que cambiás se copia el contenido para que lo edites.
+              ES y EN son independientes. La primera vez que cambias se copia el contenido para que lo edites.
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -346,7 +346,7 @@ export function CVEditor({ cv, update }: Props) {
           </div>
         }
       >
-        <p className="text-xs text-neutral-500 -mt-2">Arrastrá el asa para reordenar.</p>
+        <p className="text-xs text-neutral-500 -mt-2">Arrastra el asa para reordenar.</p>
         {cv.sections.map((section) => (
           <div
             key={section.id}
