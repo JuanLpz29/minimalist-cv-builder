@@ -16,7 +16,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trash2, Plus, GripVertical, ImagePlus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Trash2,
+  Plus,
+  GripVertical,
+  ImagePlus,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 
 interface Props {
   cv: CV;
@@ -26,7 +41,56 @@ interface Props {
 const areaCls =
   "min-h-[100px] bg-transparent border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-0 shadow-none text-sm leading-relaxed";
 
-function Group({ title, children, right }: { title: string; children: React.ReactNode; right?: React.ReactNode }) {
+const labelCls = "text-[11px] font-medium text-neutral-500 uppercase tracking-wide";
+const summaryCls =
+  "flex min-h-11 w-fit cursor-pointer list-none items-center gap-1 text-xs font-medium text-neutral-500 hover:text-neutral-900 [&::-webkit-details-marker]:hidden";
+
+const moveBtnCls =
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-30 md:h-8 md:w-8";
+
+const SECTION_KINDS: [SectionKind, string][] = [
+  ["text", "Texto (perfil, resumen…)"],
+  ["entries", "Entradas (trabajo, estudios…)"],
+  ["tags", "Etiquetas (habilidades, idiomas…)"],
+];
+
+function sectionHint(section: CVSection) {
+  if (section.kind === "entries")
+    return `${section.entries.length} ${section.entries.length === 1 ? "entrada" : "entradas"}`;
+  return section.kind === "tags" ? "Etiquetas" : "Texto";
+}
+
+function ToggleRow({
+  title,
+  hint,
+  checked,
+  onChange,
+}: {
+  title: string;
+  hint: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-4">
+      <div>
+        <div className="text-sm font-medium">{title}</div>
+        <div className="text-xs text-neutral-500">{hint}</div>
+      </div>
+      <Switch checked={checked} onCheckedChange={onChange} />
+    </label>
+  );
+}
+
+function Group({
+  title,
+  children,
+  right,
+}: {
+  title: string;
+  children: React.ReactNode;
+  right?: React.ReactNode;
+}) {
   return (
     <section className="py-6 border-b border-neutral-100 last:border-b-0">
       <SectionHeader title={title} action={right} />
@@ -46,7 +110,7 @@ function ColorField({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">{label}</Label>
+      <Label className={labelCls}>{label}</Label>
       <div className="flex items-center gap-2">
         <input
           type="color"
@@ -119,8 +183,10 @@ function BodyFormatEditor({
         <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">
           Descripción
         </Label>
-        <div className="flex items-center gap-2">
-          <span className={`text-xs ${isText ? "text-neutral-400" : "text-foreground font-medium"}`}>
+        <label className="flex min-h-10 cursor-pointer items-center gap-2">
+          <span
+            className={`text-xs ${isText ? "text-neutral-400" : "text-foreground font-medium"}`}
+          >
             Viñetas
           </span>
           <Switch
@@ -132,10 +198,12 @@ function BodyFormatEditor({
               })
             }
           />
-          <span className={`text-xs ${isText ? "text-foreground font-medium" : "text-neutral-400"}`}>
+          <span
+            className={`text-xs ${isText ? "text-foreground font-medium" : "text-neutral-400"}`}
+          >
             Texto
           </span>
-        </div>
+        </label>
       </div>
 
       {isText ? (
@@ -155,7 +223,8 @@ function BodyFormatEditor({
                 className="h-9 bg-transparent border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-0 shadow-none text-sm"
                 placeholder={bulletPlaceholder}
                 onChange={(e) => {
-                  const lines = body === "" && arr.length === 1 ? [e.target.value] : body.split("\n");
+                  const lines =
+                    body === "" && arr.length === 1 ? [e.target.value] : body.split("\n");
                   lines[idx] = e.target.value;
                   onChange({ body: lines.join("\n"), bodyFormat: "bullets" });
                 }}
@@ -172,7 +241,7 @@ function BodyFormatEditor({
                 type="button"
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 shrink-0 text-neutral-400"
+                className="h-10 w-10 shrink-0 text-neutral-400 md:h-8 md:w-8"
                 disabled={arr.length <= 1 && !line.trim()}
                 onClick={() => {
                   const lines = body.split("\n").filter((_, i) => i !== idx);
@@ -187,7 +256,7 @@ function BodyFormatEditor({
             type="button"
             size="sm"
             variant="ghost"
-            className="h-7 text-xs gap-1"
+            className="h-10 gap-1 text-xs md:h-7"
             onClick={() => {
               const lines = body === "" ? [""] : body.split("\n");
               lines.push("");
@@ -207,6 +276,21 @@ export function CVEditor({ cv, update }: Props) {
   const photoRef = useRef<HTMLInputElement>(null);
 
   const setSections = (sections: CVSection[]) => update((p) => ({ ...p, sections }));
+  const setPersonal = (key: keyof CV["personal"]) => (v: string) =>
+    update((p) => ({ ...p, personal: { ...p.personal, [key]: v } }));
+  const addSection = (kind: SectionKind) =>
+    setSections([
+      ...cv.sections,
+      newSection("Nueva sección", kind, undefined, kind === "text" ? "bullets" : undefined),
+    ]);
+
+  const move = (index: number, delta: number) => {
+    const to = index + delta;
+    if (to < 0 || to >= cv.sections.length) return;
+    const list = [...cv.sections];
+    [list[index], list[to]] = [list[to], list[index]];
+    setSections(list);
+  };
 
   const onDrop = (targetId: string) => {
     if (!dragId || dragId === targetId) return;
@@ -221,361 +305,464 @@ export function CVEditor({ cv, update }: Props) {
   };
 
   return (
-    <div className="divide-y divide-neutral-100">
-      <Group title="Diseño">
-        <LayoutPicker
-          value={cv.appearance.template === "classic" ? "classic" : "minimal"}
-          onChange={(template) =>
-            update((p) => ({
-              ...p,
-              appearance: appearanceForTemplate(template, p.appearance),
-            }))
-          }
-        />
-      </Group>
+    <Tabs defaultValue="content">
+      <TabsList className="sticky top-0 z-10 mt-4 grid h-11 w-full grid-cols-2 md:h-9">
+        <TabsTrigger value="content" className="h-full">
+          Contenido
+        </TabsTrigger>
+        <TabsTrigger value="style" className="h-full">
+          Estilo
+        </TabsTrigger>
+      </TabsList>
 
-      <Group title="Idioma">
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 px-3 py-2.5">
-          <div>
-            <div className="text-sm font-medium">Versión del CV</div>
-            <div className="text-xs text-neutral-500">
-              ES y EN son independientes. La primera vez que cambias se copia el contenido para que lo edites.
+      <TabsContent value="content" className="mt-0">
+        <Group title="Datos personales">
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => photoRef.current?.click()}
+              className="h-14 w-14 shrink-0 rounded-full border border-dashed border-neutral-300 flex items-center justify-center overflow-hidden bg-neutral-50 hover:border-neutral-400"
+              aria-label="Foto de perfil"
+            >
+              {cv.personal.photoDataUrl && !cv.appearance.atsMode ? (
+                <img src={cv.personal.photoDataUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <ImagePlus className="h-5 w-5 text-neutral-400" />
+              )}
+            </button>
+            <input
+              ref={photoRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                const dataUrl = await readImage(f);
+                update((p) => ({ ...p, personal: { ...p.personal, photoDataUrl: dataUrl } }));
+              }}
+            />
+            <div className="grid flex-1 gap-3">
+              <Field
+                label="Nombre completo"
+                value={cv.personal.fullName}
+                onChange={setPersonal("fullName")}
+              />
+              <Field label="Cargo" value={cv.personal.title} onChange={setPersonal("title")} />
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className={`text-xs font-medium ${cv.locale === "es" ? "text-foreground" : "text-neutral-400"}`}>
-              ES
-            </span>
-            <Switch
-              checked={cv.locale === "en"}
-              onCheckedChange={(en) => update((p) => switchLocale(p, (en ? "en" : "es") as Locale))}
-            />
-            <span className={`text-xs font-medium ${cv.locale === "en" ? "text-foreground" : "text-neutral-400"}`}>
-              EN
-            </span>
-          </div>
-        </div>
-      </Group>
-
-      <Group title="Datos personales">
-        <div className="flex items-center gap-4 mb-2">
-          <button
-            type="button"
-            onClick={() => photoRef.current?.click()}
-            className="h-16 w-16 rounded-full border border-dashed border-neutral-300 flex items-center justify-center overflow-hidden bg-neutral-50 hover:border-neutral-400"
-          >
-            {cv.personal.photoDataUrl && !cv.appearance.atsMode ? (
-              <img src={cv.personal.photoDataUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <ImagePlus className="h-5 w-5 text-neutral-400" />
-            )}
-          </button>
-          <input
-            ref={photoRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={async (e) => {
-              const f = e.target.files?.[0];
-              if (!f) return;
-              const dataUrl = await readImage(f);
-              update((p) => ({ ...p, personal: { ...p.personal, photoDataUrl: dataUrl } }));
-            }}
-          />
-          <div className="text-xs text-neutral-500 space-y-1">
-            <div>Foto de perfil (opcional)</div>
-            {cv.personal.photoDataUrl && (
+          {cv.personal.photoDataUrl && (
+            <div className="text-xs text-neutral-500">
               <button
                 type="button"
                 className="underline"
-                onClick={() => update((p) => ({ ...p, personal: { ...p.personal, photoDataUrl: undefined } }))}
+                onClick={() =>
+                  update((p) => ({ ...p, personal: { ...p.personal, photoDataUrl: undefined } }))
+                }
               >
                 Quitar foto
               </button>
-            )}
-            {cv.appearance.atsMode && (
-              <div className="text-amber-700">Oculta en modo ATS</div>
-            )}
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Nombre completo" value={cv.personal.fullName} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, fullName: v } }))} />
-          <Field label="Cargo" value={cv.personal.title} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, title: v } }))} />
-          <Field label="Correo" value={cv.personal.email} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, email: v } }))} />
-          <Field label="Teléfono" value={cv.personal.phone} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, phone: v } }))} />
-          <Field label="Ciudad" value={cv.personal.city} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, city: v } }))} />
-          <Field label="LinkedIn" value={cv.personal.linkedin} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, linkedin: v } }))} />
-          <Field label="GitHub" value={cv.personal.github} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, github: v } }))} />
-          <Field label="Website" value={cv.personal.website} onChange={(v) => update((p) => ({ ...p, personal: { ...p.personal, website: v } }))} />
-        </div>
-      </Group>
+              {cv.appearance.atsMode && (
+                <span className="ml-2 text-amber-700">Oculta en modo ATS</span>
+              )}
+            </div>
+          )}
+          <details className="group">
+            <summary className={summaryCls}>
+              <ChevronRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
+              Contacto y enlaces
+            </summary>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <Field label="Correo" value={cv.personal.email} onChange={setPersonal("email")} />
+              <Field label="Teléfono" value={cv.personal.phone} onChange={setPersonal("phone")} />
+              <Field label="Ciudad" value={cv.personal.city} onChange={setPersonal("city")} />
+              <Field
+                label="LinkedIn"
+                value={cv.personal.linkedin}
+                onChange={setPersonal("linkedin")}
+              />
+              <Field label="GitHub" value={cv.personal.github} onChange={setPersonal("github")} />
+              <Field
+                label="Sitio web"
+                value={cv.personal.website}
+                onChange={setPersonal("website")}
+              />
+            </div>
+          </details>
+        </Group>
 
-      <Group
-        title="Secciones"
-        right={
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 gap-1 text-xs"
-              onClick={() =>
-                setSections([
-                  ...cv.sections,
-                  newSection(cv.locale === "es" ? "Nueva sección" : "Nueva sección", "text", undefined, "bullets"),
-                ])
-              }
+        <Group title="Secciones">
+          {cv.sections.map((section, index) => (
+            <details
+              key={section.id}
+              draggable
+              onDragStart={() => setDragId(section.id)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => onDrop(section.id)}
+              className={`group rounded-lg border border-neutral-200 bg-white ${dragId === section.id ? "opacity-60" : ""}`}
             >
-              <Plus className="h-3.5 w-3.5" /> Texto
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 gap-1 text-xs"
-              onClick={() => setSections([...cv.sections, newSection(cv.locale === "es" ? "Nueva sección" : "Nueva sección", "entries")])}
-            >
-              <Plus className="h-3.5 w-3.5" /> Entradas
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 gap-1 text-xs"
-              onClick={() => setSections([...cv.sections, newSection(cv.locale === "es" ? "Nueva sección" : "Nueva sección", "tags")])}
-            >
-              <Plus className="h-3.5 w-3.5" /> Etiquetas
-            </Button>
-          </div>
-        }
-      >
-        <p className="text-xs text-neutral-500 -mt-2">Arrastra el asa para reordenar.</p>
-        {cv.sections.map((section) => (
-          <div
-            key={section.id}
-            draggable
-            onDragStart={() => setDragId(section.id)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={() => onDrop(section.id)}
-            className={`rounded-lg border border-neutral-200 p-4 space-y-3 bg-white ${dragId === section.id ? "opacity-60" : ""}`}
-          >
-            <div className="flex items-start gap-2">
-              <button type="button" className="mt-2 text-neutral-400 cursor-grab active:cursor-grabbing" aria-label="Drag">
-                <GripVertical className="h-4 w-4" />
-              </button>
-              <div className="flex-1 grid grid-cols-2 gap-3">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 py-1 pl-3 pr-2 [&::-webkit-details-marker]:hidden">
+                <GripVertical
+                  className="hidden h-4 w-4 shrink-0 cursor-grab text-neutral-300 active:cursor-grabbing md:block"
+                  aria-label="Arrastrar para reordenar"
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium">
+                    {section.title || "Sin título"}
+                  </span>
+                  <span className="block text-xs text-neutral-400">{sectionHint(section)}</span>
+                </span>
+                <button
+                  type="button"
+                  aria-label="Subir sección"
+                  disabled={index === 0}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    move(index, -1);
+                  }}
+                  className={moveBtnCls}
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Bajar sección"
+                  disabled={index === cv.sections.length - 1}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    move(index, 1);
+                  }}
+                  className={moveBtnCls}
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+                <ChevronRight className="h-4 w-4 shrink-0 text-neutral-400 transition-transform group-open:rotate-90" />
+              </summary>
+
+              <div className="space-y-4 border-t border-neutral-100 p-4">
                 <Field
                   label="Título de sección"
                   value={section.title}
                   onChange={(v) => setSections(patchSection(cv.sections, section.id, { title: v }))}
                 />
-                <div className="space-y-1.5">
-                  <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">Type</Label>
-                  <Select
-                    value={section.kind}
-                    onValueChange={(v) =>
-                      setSections(
-                        patchSection(cv.sections, section.id, {
-                          kind: v as SectionKind,
-                          entries: v === "entries" && !section.entries.length ? [newEntry()] : section.entries,
-                        }),
-                      )
-                    }
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="text">Texto</SelectItem>
-                      <SelectItem value="entries">Entradas (trabajo, estudios…)</SelectItem>
-                      <SelectItem value="tags">Etiquetas / lista</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <ColorField
-                  label="Color del título"
-                  value={section.titleColor}
-                  onChange={(v) => setSections(patchSection(cv.sections, section.id, { titleColor: v }))}
-                />
-                <ColorField
-                  label="Color del subtítulo"
-                  value={section.subtitleColor}
-                  onChange={(v) => setSections(patchSection(cv.sections, section.id, { subtitleColor: v }))}
-                />
-              </div>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 text-neutral-400 hover:text-destructive"
-                onClick={() => setSections(cv.sections.filter((s) => s.id !== section.id))}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
 
-            {section.kind === "tags" ? (
-              <Textarea
-                value={section.body}
-                onChange={(e) => setSections(patchSection(cv.sections, section.id, { body: e.target.value }))}
-                className={areaCls}
-                placeholder="Un ítem por línea, o Categoría: a, b, c"
-              />
-            ) : section.kind === "text" ? (
-              <BodyFormatEditor
-                body={section.body}
-                bodyFormat={section.bodyFormat === "bullets" ? "bullets" : "text"}
-                textPlaceholder="Contenido de la sección…"
-                bulletPlaceholder="Punto o logro…"
-                onChange={(patch) => setSections(patchSection(cv.sections, section.id, patch))}
-              />
-            ) : (
-              <div className="space-y-3">
-                {section.entries.map((entry) => (
-                  <div key={entry.id} className="rounded-md border border-neutral-100 p-3 space-y-2 relative">
+                {section.kind === "tags" ? (
+                  <Textarea
+                    value={section.body}
+                    onChange={(e) =>
+                      setSections(patchSection(cv.sections, section.id, { body: e.target.value }))
+                    }
+                    className={areaCls}
+                    placeholder="Un ítem por línea, o Categoría: a, b, c"
+                  />
+                ) : section.kind === "text" ? (
+                  <BodyFormatEditor
+                    body={section.body}
+                    bodyFormat={section.bodyFormat === "bullets" ? "bullets" : "text"}
+                    textPlaceholder="Contenido de la sección…"
+                    bulletPlaceholder="Punto o logro…"
+                    onChange={(patch) => setSections(patchSection(cv.sections, section.id, patch))}
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {section.entries.map((entry) => (
+                      <details
+                        key={entry.id}
+                        className="group/entry rounded-md border border-neutral-100"
+                      >
+                        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 py-2 [&::-webkit-details-marker]:hidden">
+                          <ChevronRight className="h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform group-open/entry:rotate-90" />
+                          <span className="flex-1 truncate text-sm">
+                            {[entry.heading, entry.subheading].filter(Boolean).join(" · ") ||
+                              "Nueva entrada"}
+                          </span>
+                          <span className="hidden truncate text-xs text-neutral-400 sm:inline">
+                            {entry.meta}
+                          </span>
+                        </summary>
+                        <div className="space-y-2 border-t border-neutral-100 p-3">
+                          <div className="grid grid-cols-2 gap-2">
+                            <Field
+                              label="Título"
+                              value={entry.heading}
+                              onChange={(v) =>
+                                setSections(
+                                  patchEntry(cv.sections, section.id, entry.id, { heading: v }),
+                                )
+                              }
+                            />
+                            <Field
+                              label="Subtítulo"
+                              value={entry.subheading}
+                              onChange={(v) =>
+                                setSections(
+                                  patchEntry(cv.sections, section.id, entry.id, { subheading: v }),
+                                )
+                              }
+                            />
+                            <div className="col-span-2">
+                              <Field
+                                label="Fechas o enlace"
+                                value={entry.meta}
+                                onChange={(v) =>
+                                  setSections(
+                                    patchEntry(cv.sections, section.id, entry.id, { meta: v }),
+                                  )
+                                }
+                              />
+                            </div>
+                          </div>
+                          <BodyFormatEditor
+                            body={entry.body}
+                            bodyFormat={entry.bodyFormat === "text" ? "text" : "bullets"}
+                            onChange={(patch) =>
+                              setSections(patchEntry(cv.sections, section.id, entry.id, patch))
+                            }
+                          />
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-10 gap-1 text-xs text-neutral-500 hover:text-destructive md:h-7"
+                            onClick={() =>
+                              setSections(
+                                cv.sections.map((s) =>
+                                  s.id === section.id
+                                    ? { ...s, entries: s.entries.filter((e) => e.id !== entry.id) }
+                                    : s,
+                                ),
+                              )
+                            }
+                          >
+                            <Trash2 className="h-3.5 w-3.5" /> Eliminar entrada
+                          </Button>
+                        </div>
+                      </details>
+                    ))}
                     <Button
-                      size="icon"
-                      variant="ghost"
-                      className="absolute top-1 right-1 h-7 w-7 text-neutral-400"
+                      size="sm"
+                      variant="outline"
+                      className="h-10 md:h-8"
                       onClick={() =>
                         setSections(
                           cv.sections.map((s) =>
-                            s.id === section.id
-                              ? { ...s, entries: s.entries.filter((e) => e.id !== entry.id) }
-                              : s,
+                            s.id === section.id ? { ...s, entries: [...s.entries, newEntry()] } : s,
                           ),
                         )
                       }
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Agregar entrada
                     </Button>
-                    <div className="grid grid-cols-2 gap-2 pr-8">
-                      <Field
-                        label="Título"
-                        value={entry.heading}
-                        onChange={(v) => setSections(patchEntry(cv.sections, section.id, entry.id, { heading: v }))}
-                      />
-                      <Field
-                        label="Subtítulo"
-                        value={entry.subheading}
-                        onChange={(v) => setSections(patchEntry(cv.sections, section.id, entry.id, { subheading: v }))}
-                      />
-                      <div className="col-span-2">
-                        <Field
-                          label="Meta (fechas, enlace…)"
-                          value={entry.meta}
-                          onChange={(v) => setSections(patchEntry(cv.sections, section.id, entry.id, { meta: v }))}
-                        />
-                      </div>
+                  </div>
+                )}
+
+                <details className="group/opts">
+                  <summary className={summaryCls}>
+                    <ChevronRight className="h-3.5 w-3.5 transition-transform group-open/opts:rotate-90" />
+                    Más opciones
+                  </summary>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <div className="col-span-2 space-y-1.5">
+                      <Label className={labelCls}>Tipo</Label>
+                      <Select
+                        value={section.kind}
+                        onValueChange={(v) =>
+                          setSections(
+                            patchSection(cv.sections, section.id, {
+                              kind: v as SectionKind,
+                              entries:
+                                v === "entries" && !section.entries.length
+                                  ? [newEntry()]
+                                  : section.entries,
+                            }),
+                          )
+                        }
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SECTION_KINDS.map(([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <BodyFormatEditor
-                      body={entry.body}
-                      bodyFormat={entry.bodyFormat === "text" ? "text" : "bullets"}
-                      onChange={(patch) =>
-                        setSections(patchEntry(cv.sections, section.id, entry.id, patch))
+                    <ColorField
+                      label="Color del título"
+                      value={section.titleColor}
+                      onChange={(v) =>
+                        setSections(patchSection(cv.sections, section.id, { titleColor: v }))
+                      }
+                    />
+                    <ColorField
+                      label="Color del subtítulo"
+                      value={section.subtitleColor}
+                      onChange={(v) =>
+                        setSections(patchSection(cv.sections, section.id, { subtitleColor: v }))
                       }
                     />
                   </div>
-                ))}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8"
-                  onClick={() =>
-                    setSections(
-                      cv.sections.map((s) =>
-                        s.id === section.id ? { ...s, entries: [...s.entries, newEntry()] } : s,
-                      ),
-                    )
-                  }
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1" /> Agregar entrada
-                </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="mt-3 h-10 gap-1 text-xs text-neutral-500 hover:text-destructive md:h-8"
+                    onClick={() => setSections(cv.sections.filter((s) => s.id !== section.id))}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Eliminar sección
+                  </Button>
+                </details>
               </div>
-            )}
+            </details>
+          ))}
 
-          </div>
-        ))}
-      </Group>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-9 w-full gap-1 text-sm">
+                <Plus className="h-4 w-4" /> Agregar sección
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-64">
+              {SECTION_KINDS.map(([value, label]) => (
+                <DropdownMenuItem key={value} onSelect={() => addSection(value)}>
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </Group>
+      </TabsContent>
 
-      <Group title="Apariencia">
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 px-3 py-2.5 mb-2">
-          <div>
-            <div className="text-sm font-medium">Modo ATS</div>
-            <div className="text-xs text-neutral-500">Oculta la foto de perfil al exportar / vista previa</div>
-          </div>
-          <Switch
+      <TabsContent value="style" className="mt-0">
+        <Group title="Diseño">
+          <LayoutPicker
+            value={cv.appearance.template === "classic" ? "classic" : "minimal"}
+            onChange={(template) =>
+              update((p) => ({
+                ...p,
+                appearance: appearanceForTemplate(template, p.appearance),
+              }))
+            }
+          />
+        </Group>
+
+        <Group title="Idioma y formato">
+          <ToggleRow
+            title="Versión en inglés"
+            hint="ES y EN se editan por separado. La primera vez se copia el contenido."
+            checked={cv.locale === "en"}
+            onChange={(en) => update((p) => switchLocale(p, (en ? "en" : "es") as Locale))}
+          />
+          <ToggleRow
+            title="Modo ATS"
+            hint="Oculta la foto para que los filtros automáticos lean bien el CV."
             checked={cv.appearance.atsMode}
-            onCheckedChange={(atsMode) => update((p) => ({ ...p, appearance: { ...p.appearance, atsMode } }))}
+            onChange={(atsMode) =>
+              update((p) => ({ ...p, appearance: { ...p.appearance, atsMode } }))
+            }
           />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wide">Font</Label>
-            <Select
-              value={cv.appearance.font}
-              onValueChange={(v) =>
-                update((p) => ({ ...p, appearance: { ...p.appearance, font: v as CV["appearance"]["font"] } }))
+        </Group>
+
+        <Group title="Tipografía y colores">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2 space-y-1.5">
+              <Label className={labelCls}>Fuente</Label>
+              <Select
+                value={cv.appearance.font}
+                onValueChange={(v) =>
+                  update((p) => ({
+                    ...p,
+                    appearance: { ...p.appearance, font: v as CV["appearance"]["font"] },
+                  }))
+                }
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_FAMILIES.map((f) => (
+                    <SelectItem key={f} value={f}>
+                      {f}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <ColorField
+              label="Color de acento"
+              value={cv.appearance.accentColor}
+              onChange={(v) =>
+                update((p) => ({ ...p, appearance: { ...p.appearance, accentColor: v } }))
               }
-            >
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FONT_FAMILIES.map((f) => (
-                  <SelectItem key={f} value={f}>
-                    {f}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
+            <ColorField
+              label="Color del nombre"
+              value={cv.appearance.nameColor}
+              onChange={(v) =>
+                update((p) => ({ ...p, appearance: { ...p.appearance, nameColor: v } }))
+              }
+            />
+            <ColorField
+              label="Color del cargo"
+              value={cv.appearance.titleColor}
+              onChange={(v) =>
+                update((p) => ({ ...p, appearance: { ...p.appearance, titleColor: v } }))
+              }
+            />
           </div>
-          <ColorField
-            label="Color de acento"
-            value={cv.appearance.accentColor}
-            onChange={(v) => update((p) => ({ ...p, appearance: { ...p.appearance, accentColor: v } }))}
-          />
-          <ColorField
-            label="Color del nombre"
-            value={cv.appearance.nameColor}
-            onChange={(v) => update((p) => ({ ...p, appearance: { ...p.appearance, nameColor: v } }))}
-          />
-          <ColorField
-            label="Color del cargo"
-            value={cv.appearance.titleColor}
-            onChange={(v) => update((p) => ({ ...p, appearance: { ...p.appearance, titleColor: v } }))}
-          />
-          <Field
-            label="Tamaño (pt)"
-            type="number"
-            value={String(cv.appearance.fontSize)}
-            onChange={(v) =>
-              update((p) => ({
-                ...p,
-                appearance: { ...p.appearance, fontSize: Math.max(9, Math.min(14, Number(v) || 11)) },
-              }))
-            }
-          />
-          <Field
-            label="Interlineado"
-            type="number"
-            value={String(cv.appearance.spacing)}
-            onChange={(v) =>
-              update((p) => ({
-                ...p,
-                appearance: { ...p.appearance, spacing: Math.max(1, Math.min(2, Number(v) || 1.5)) },
-              }))
-            }
-          />
-          <Field
-            label="Margen (mm)"
-            type="number"
-            value={String(cv.appearance.margin)}
-            onChange={(v) =>
-              update((p) => ({
-                ...p,
-                appearance: { ...p.appearance, margin: Math.max(12, Math.min(32, Number(v) || 20)) },
-              }))
-            }
-          />
-        </div>
-      </Group>
-    </div>
+          <details className="group">
+            <summary className={summaryCls}>
+              <ChevronRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
+              Tamaño, interlineado y márgenes
+            </summary>
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              <Field
+                label="Tamaño (pt)"
+                type="number"
+                value={String(cv.appearance.fontSize)}
+                onChange={(v) =>
+                  update((p) => ({
+                    ...p,
+                    appearance: {
+                      ...p.appearance,
+                      fontSize: Math.max(9, Math.min(14, Number(v) || 11)),
+                    },
+                  }))
+                }
+              />
+              <Field
+                label="Interlineado"
+                type="number"
+                value={String(cv.appearance.spacing)}
+                onChange={(v) =>
+                  update((p) => ({
+                    ...p,
+                    appearance: {
+                      ...p.appearance,
+                      spacing: Math.max(1, Math.min(2, Number(v) || 1.5)),
+                    },
+                  }))
+                }
+              />
+              <Field
+                label="Margen (mm)"
+                type="number"
+                value={String(cv.appearance.margin)}
+                onChange={(v) =>
+                  update((p) => ({
+                    ...p,
+                    appearance: {
+                      ...p.appearance,
+                      margin: Math.max(12, Math.min(32, Number(v) || 20)),
+                    },
+                  }))
+                }
+              />
+            </div>
+          </details>
+        </Group>
+      </TabsContent>
+    </Tabs>
   );
 }
