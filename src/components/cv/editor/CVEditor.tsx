@@ -466,14 +466,21 @@ export function CVEditor({ cv, update }: Props) {
                 />
 
                 {section.kind === "tags" ? (
-                  <Textarea
-                    value={section.body}
-                    onChange={(e) =>
-                      setSections(patchSection(cv.sections, section.id, { body: e.target.value }))
-                    }
-                    className={areaCls}
-                    placeholder="Un ítem por línea, o Categoría: a, b, c"
-                  />
+                  <div className="space-y-1.5">
+                    <Textarea
+                      value={section.body}
+                      onChange={(e) =>
+                        setSections(patchSection(cv.sections, section.id, { body: e.target.value }))
+                      }
+                      className={areaCls}
+                      placeholder={"Lenguajes: Python, SQL\nInglés: Avanzado (C1)"}
+                    />
+                    <p className="text-xs text-neutral-500">
+                      * Escribe una línea por categoría con dos puntos, por ejemplo{" "}
+                      <span className="font-medium text-neutral-700">Lenguajes: Python, SQL</span>.
+                      Lo que va antes de los dos puntos sale en negrita.
+                    </p>
+                  </div>
                 ) : section.kind === "text" ? (
                   <BodyFormatEditor
                     body={section.body}
