@@ -37,6 +37,8 @@ export interface CVSection {
   body: string;
   /** Solo kind text: bullets = una línea por ítem; text = párrafo */
   bodyFormat?: "bullets" | "text";
+  /** Solo kind tags: "Categoría: a, b" en una línea en vez de nombre arriba y contenido abajo */
+  tagsInline?: boolean;
   entries: SectionEntry[];
 }
 
