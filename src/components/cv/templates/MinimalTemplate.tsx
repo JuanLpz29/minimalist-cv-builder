@@ -17,7 +17,11 @@ export function MinimalTemplate({ cv }: { cv: CV }) {
   return (
     <PageShell cv={cv}>
       <header className={`mb-8 ${showPhoto ? "flex gap-4 items-start" : ""}`}>
-        <Photo src={personal.photoDataUrl} atsMode={appearance.atsMode} />
+        <Photo
+          src={personal.photoDataUrl}
+          atsMode={appearance.atsMode}
+          position={personal.photoPosition}
+        />
         <div className="min-w-0 flex-1">
           <h1
             className="text-[22pt] font-semibold tracking-tight leading-tight"

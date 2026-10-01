@@ -14,6 +14,8 @@ export interface PersonalInfo {
   website: string;
   /** data URL; oculto si appearance.atsMode */
   photoDataUrl?: string;
+  /** Qué parte de la foto queda dentro del círculo (object-position). */
+  photoPosition?: "center" | "top";
 }
 
 export type SectionKind = "text" | "entries" | "tags";

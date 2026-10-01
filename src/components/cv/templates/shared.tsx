@@ -111,13 +111,22 @@ export function PageShell({ cv, children }: { cv: CV; children: React.ReactNode 
   );
 }
 
-export function Photo({ src, atsMode }: { src?: string; atsMode: boolean }) {
+export function Photo({
+  src,
+  atsMode,
+  position = "center",
+}: {
+  src?: string;
+  atsMode: boolean;
+  position?: "center" | "top";
+}) {
   if (!src || atsMode) return null;
   return (
     <img
       src={src}
       alt=""
       className="h-20 w-20 rounded-full object-cover shrink-0 border border-neutral-200"
+      style={{ objectPosition: position }}
     />
   );
 }

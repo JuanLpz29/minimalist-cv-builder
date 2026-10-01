@@ -344,7 +344,12 @@ export function CVEditor({ cv, update }: Props) {
               aria-label="Foto de perfil"
             >
               {cv.personal.photoDataUrl && !cv.appearance.atsMode ? (
-                <img src={cv.personal.photoDataUrl} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={cv.personal.photoDataUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: cv.personal.photoPosition ?? "center" }}
+                />
               ) : (
                 <ImagePlus className="h-5 w-5 text-neutral-400" />
               )}
@@ -371,10 +376,24 @@ export function CVEditor({ cv, update }: Props) {
             </div>
           </div>
           {cv.personal.photoDataUrl && (
-            <div className="text-xs text-neutral-500">
+            <div className="flex flex-wrap items-center gap-x-3 text-xs text-neutral-500">
+              <span>Encuadre:</span>
+              {(["center", "top"] as const).map((pos) => (
+                <button
+                  key={pos}
+                  type="button"
+                  className={`min-h-10 ${(cv.personal.photoPosition ?? "center") === pos ? "font-semibold text-neutral-900" : "underline"}`}
+                  onClick={() =>
+                    update((p) => ({ ...p, personal: { ...p.personal, photoPosition: pos } }))
+                  }
+                >
+                  {pos === "center" ? "Centro" : "Arriba"}
+                </button>
+              ))}
+              <span className="text-neutral-300">·</span>
               <button
                 type="button"
-                className="underline"
+                className="min-h-10 underline"
                 onClick={() =>
                   update((p) => ({ ...p, personal: { ...p.personal, photoDataUrl: undefined } }))
                 }
