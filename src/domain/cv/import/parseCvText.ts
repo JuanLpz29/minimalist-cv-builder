@@ -21,8 +21,8 @@ const DATE_RANGE_RE = new RegExp(
 
 function normalize(text: string): string {
   return text
-    .replace(/\u000c/g, "\n")
-    .replace(/[\u00ad\u200b\u200c\u200d\ufeff]/g, "")
+    .replace(/\f/g, "\n")
+    .replace(/\u00ad|\u200b|\u200c|\u200d|\ufeff/g, "")
     .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .replace(/[ \t]{2,}/g, " ")
@@ -46,7 +46,12 @@ function isDateOnlyLine(line: string) {
 function looksLikeJobHeader(line: string) {
   if (isBullet(line) || isDateOnlyLine(line) || line.length > 140) return false;
   if ((line.match(/\|/g) ?? []).length >= 1) return true;
-  if (line === line.toUpperCase() && /[A-ZÁÉÍÓÚÑ]{3,}/.test(line) && line.length < 90 && !KNOWN_HEADER.test(line))
+  if (
+    line === line.toUpperCase() &&
+    /[A-ZÁÉÍÓÚÑ]{3,}/.test(line) &&
+    line.length < 90 &&
+    !KNOWN_HEADER.test(line)
+  )
     return true;
   return false;
 }
@@ -76,7 +81,8 @@ function parseContactLine(line: string, personal: CV["personal"]) {
   const parts = line.split("|").map((p) => p.trim());
   for (const p of parts) {
     if (!p) continue;
-    if (EMAIL_RE.test(p) || PHONE_RE.test(p) || /linkedin|github/i.test(p) || URL_RE.test(p)) continue;
+    if (EMAIL_RE.test(p) || PHONE_RE.test(p) || /linkedin|github/i.test(p) || URL_RE.test(p))
+      continue;
     if (!personal.city && /[a-záéíóúñ]/i.test(p)) personal.city = p;
   }
   for (const p of parts) {
@@ -93,9 +99,15 @@ function parseJobHeader(line: string): Pick<SectionEntry, "heading" | "subheadin
   let rest = cleaned;
   if (dateMatch) {
     meta = `${dateMatch[1].trim()} — ${dateMatch[2].trim()}`;
-    rest = cleaned.replace(DATE_RANGE_RE, "").replace(/\s*[|·•]\s*$/, "").trim();
+    rest = cleaned
+      .replace(DATE_RANGE_RE, "")
+      .replace(/\s*[|·•]\s*$/, "")
+      .trim();
   }
-  const parts = rest.split("|").map((p) => p.trim()).filter(Boolean);
+  const parts = rest
+    .split("|")
+    .map((p) => p.trim())
+    .filter(Boolean);
   if (parts.length >= 2) {
     return { heading: parts[0], subheading: parts.slice(1).join(" · "), meta };
   }
@@ -202,7 +214,12 @@ export function parseCvText(raw: string, titleHint?: string): CV {
     if (nonempty[0] && /^curriculum/i.test(nonempty[0])) idx = 1;
     if (nonempty[idx]) cv.personal.fullName = nonempty[idx];
     for (const line of nonempty.slice(idx + 1, idx + 8)) {
-      if (/\|/.test(line) || EMAIL_RE.test(line) || PHONE_RE.test(line) || /contacto:|cel\.|tel\./i.test(line)) {
+      if (
+        /\|/.test(line) ||
+        EMAIL_RE.test(line) ||
+        PHONE_RE.test(line) ||
+        /contacto:|cel\.|tel\./i.test(line)
+      ) {
         parseContactLine(line, cv.personal);
         continue;
       }
@@ -239,7 +256,8 @@ export function parseCvText(raw: string, titleHint?: string): CV {
     if (/portafolio|portfolio/i.test(block.title)) {
       for (const line of block.body) {
         const url = line.match(URL_RE)?.[0];
-        if (url && !/linkedin|github/i.test(url)) cv.personal.website = url.replace(/^https?:\/\//, "");
+        if (url && !/linkedin|github/i.test(url))
+          cv.personal.website = url.replace(/^https?:\/\//, "");
       }
     }
 

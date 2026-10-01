@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CV } from "@/domain/cv/types";
 import { localRepository } from "@/domain/cv/repository";
 
@@ -68,8 +68,8 @@ export function useCV(id: string | undefined) {
     });
   }, [persist]);
 
-  const canUndo = useMemo(() => history.current.length > 0, [cv]);
-  const canRedo = useMemo(() => future.current.length > 0, [cv]);
+  const canUndo = history.current.length > 0;
+  const canRedo = future.current.length > 0;
 
   return { cv, setCV, loading, saving, update, undo, redo, canUndo, canRedo };
 }
