@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useCV } from "@/hooks/useCV";
 import { toast } from "sonner";
+import { DonateLink } from "@/components/DonateLink";
 import { CVEditor } from "@/components/cv/editor/CVEditor";
 import { CVPreview } from "@/components/cv/CVPreview";
 
@@ -222,6 +223,9 @@ function EditorPage() {
         >
           <div className="mx-auto max-w-xl px-4 sm:px-6">
             <CVEditor cv={cv} update={update} />
+            <div className="border-t border-neutral-100 py-4 text-center">
+              <DonateLink />
+            </div>
           </div>
         </div>
 

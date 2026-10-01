@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { DonateLink } from "@/components/DonateLink";
 
 export const Route = createFileRoute("/")({ component: Dashboard });
 
@@ -130,6 +131,7 @@ function Dashboard() {
               Empezar en blanco
             </Button>
           </div>
+          <DonateLink className="mt-3" />
         </div>
 
         <h2 className="mb-2 text-sm font-semibold text-neutral-500">Tus currículums</h2>
