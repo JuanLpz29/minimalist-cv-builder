@@ -88,23 +88,24 @@ function Dashboard() {
   return (
     <div className="min-h-dvh bg-white text-neutral-900">
       <header className="border-b border-neutral-100 bg-white">
-        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-2">
-            <img src="/favicon.svg" alt="" className="h-5 w-5" />
-            <span className="text-sm font-semibold tracking-tight">Vitae Builder</span>
+        <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 sm:h-20 sm:px-6">
+          <div className="flex items-center gap-2.5">
+            <img src="/favicon.svg" alt="" className="h-8 w-8 sm:h-9 sm:w-9" />
+            <span className="text-lg font-bold tracking-tight sm:text-xl">Vitae Builder</span>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-14">
-        <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Tus currículums</h1>
-            <p className="mt-1 text-sm text-neutral-500">
-              Abre el ejemplo y reemplaza el texto, o importa / crea uno nuevo.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="mb-10 sm:mb-14">
+          <h1 className="max-w-2xl text-2xl font-semibold tracking-tight text-balance sm:text-4xl">
+            Importa tu CV, edítalo y descárgalo en PDF
+          </h1>
+          <p className="mt-3 max-w-xl text-base text-neutral-500">
+            Sube tu CV en PDF o Word, o empieza desde el ejemplo. Gratis, sin tarjeta y sin cuenta:
+            tu CV no sale de tu navegador.
+          </p>
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               ref={fileRef}
               type="file"
@@ -113,20 +114,25 @@ function Dashboard() {
               onChange={(e) => onImport(e.target.files?.[0])}
             />
             <Button
-              variant="outline"
-              className="h-10 w-full gap-1.5 sm:h-9 sm:w-auto"
+              className="h-11 w-full gap-1.5 px-5 sm:w-auto"
               disabled={importing}
               onClick={() => fileRef.current?.click()}
             >
               <Upload className="h-4 w-4" />
-              {importing ? "Importando…" : "Importar PDF/DOCX"}
+              {importing ? "Importando…" : "Importar mi CV (PDF o Word)"}
             </Button>
-            <Button onClick={openCreate} className="h-10 w-full gap-1.5 sm:h-9 sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={openCreate}
+              className="h-11 w-full gap-1.5 sm:w-auto"
+            >
               <Plus className="h-4 w-4" />
-              Nuevo CV
+              Empezar en blanco
             </Button>
           </div>
         </div>
+
+        <h2 className="mb-2 text-sm font-semibold text-neutral-500">Tus currículums</h2>
 
         <ul className="divide-y divide-neutral-100 border-y border-neutral-100">
           {cvs.map((cv) => (
