@@ -69,7 +69,7 @@ function Dashboard() {
       const cv = await importCvFromFile(file);
       cv.appearance = appearanceForTemplate(cv.appearance.template ?? "minimal", cv.appearance);
       await localRepository.save(cv);
-      toast.success("CV importado — revisá los campos y ajustá lo que falte");
+      toast.success("CV importado — revisa los campos y ajusta lo que falte");
       navigate({ to: "/cv/$id", params: { id: cv.id } });
     } catch (err) {
       console.error(err);
@@ -101,7 +101,7 @@ function Dashboard() {
           <div>
             <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Tus currículums</h1>
             <p className="mt-1 text-sm text-neutral-500">
-              Abrí el ejemplo y reemplazá el texto, o importá / creá uno nuevo.
+              Abre el ejemplo y reemplaza el texto, o importa / crea uno nuevo.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -176,9 +176,9 @@ function Dashboard() {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] bg-white sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Elegí el diseño</DialogTitle>
+            <DialogTitle>Elige el diseño</DialogTitle>
             <DialogDescription>
-              CV en blanco. El diseño lo podés cambiar después en el editor.
+              CV en blanco. El diseño lo puedes cambiar después en el editor.
             </DialogDescription>
           </DialogHeader>
           <LayoutPicker value={pickedLayout} onChange={setPickedLayout} />

@@ -39,7 +39,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-white px-4">
       <div className="max-w-md text-center">
         <h1 className="text-lg font-semibold text-neutral-900">Algo salió mal</h1>
-        <p className="mt-2 text-sm text-neutral-500">Probá de nuevo en un momento.</p>
+        <p className="mt-2 text-sm text-neutral-500">Prueba de nuevo en un momento.</p>
         <button
           onClick={() => {
             router.invalidate();
@@ -67,7 +67,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Vitae Builder — Editor de currículums" },
       {
         name: "description",
-        content: "Importá PDF/DOCX, editá secciones y exportá tu CV a PDF.",
+        content: "Importa PDF/DOCX, edita secciones y exporta tu CV a PDF.",
       },
       { property: "og:title", content: "Vitae Builder" },
       {
