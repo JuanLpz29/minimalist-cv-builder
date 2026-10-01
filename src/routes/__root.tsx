@@ -54,6 +54,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+// LinkedIn y otros solo leen og:image con URL absoluta. Netlify inyecta $URL en el build (netlify.toml).
+const SITE_URL = import.meta.env.VITE_SITE_URL ?? "";
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -67,8 +70,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Importá PDF/DOCX, editá secciones y exportá tu CV a PDF.",
       },
       { property: "og:title", content: "Vitae Builder" },
-      { property: "og:description", content: "Editor minimalista de currículums." },
+      {
+        property: "og:description",
+        content: "Importa tu CV, edítalo y descárgalo en PDF. Gratis, sin tarjeta y sin cuenta.",
+      },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: `${SITE_URL}/` },
+      { property: "og:image", content: `${SITE_URL}/og.png` },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
