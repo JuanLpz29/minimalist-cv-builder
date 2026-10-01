@@ -90,9 +90,8 @@ function Dashboard() {
       <header className="border-b border-neutral-100 bg-white">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <div className="h-5 w-5 rounded bg-neutral-900" />
-            <span className="text-sm font-semibold tracking-tight">Mitrilo</span>
-            <span className="text-sm text-neutral-400">/ CVs</span>
+            <img src="/favicon.svg" alt="" className="h-5 w-5" />
+            <span className="text-sm font-semibold tracking-tight">CV Builder</span>
           </div>
         </div>
       </header>
@@ -184,7 +183,11 @@ function Dashboard() {
           </DialogHeader>
           <LayoutPicker value={pickedLayout} onChange={setPickedLayout} />
           <DialogFooter className="flex-col gap-2 sm:flex-row sm:gap-0">
-            <Button variant="ghost" className="w-full sm:w-auto" onClick={() => setCreateOpen(false)}>
+            <Button
+              variant="ghost"
+              className="w-full sm:w-auto"
+              onClick={() => setCreateOpen(false)}
+            >
               Cancelar
             </Button>
             <Button className="w-full sm:w-auto" onClick={() => create(pickedLayout)}>

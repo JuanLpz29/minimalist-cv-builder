@@ -19,7 +19,10 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-6xl font-semibold tracking-tight text-neutral-900">404</h1>
         <p className="mt-3 text-sm text-neutral-500">Esta página no existe.</p>
-        <Link to="/" className="mt-6 inline-flex text-sm text-neutral-900 underline underline-offset-4">
+        <Link
+          to="/"
+          className="mt-6 inline-flex text-sm text-neutral-900 underline underline-offset-4"
+        >
           Volver al inicio
         </Link>
       </div>
@@ -58,12 +61,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "color-scheme", content: "light only" },
       { name: "theme-color", content: "#ffffff" },
-      { title: "Mitrilo CV — Editor de currículums" },
+      { title: "CV Builder — Editor de currículums" },
       {
         name: "description",
         content: "Importá PDF/DOCX, editá secciones y exportá tu CV a PDF.",
       },
-      { property: "og:title", content: "Mitrilo CV" },
+      { property: "og:title", content: "CV Builder" },
       { property: "og:description", content: "Editor minimalista de currículums." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
