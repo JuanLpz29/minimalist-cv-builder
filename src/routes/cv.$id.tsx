@@ -104,7 +104,7 @@ function EditorPage() {
       <header className="no-print flex h-14 shrink-0 items-center gap-2 border-b border-neutral-100 bg-white px-3 sm:gap-3 sm:px-4">
         <Link
           to="/"
-          className="shrink-0 rounded-md p-1.5 text-neutral-600 hover:bg-neutral-100"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100 sm:h-8 sm:w-8"
           aria-label="Volver"
         >
           <ArrowLeft className="h-4 w-4" />
