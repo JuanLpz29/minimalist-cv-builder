@@ -32,7 +32,7 @@ export function DonateCard() {
         rel="noopener noreferrer"
         className="inline-flex h-11 items-center justify-center rounded-full bg-blue-600 px-6 text-sm font-medium text-white hover:bg-blue-700"
       >
-        Ir a Donar
+        Donar
       </a>
     </div>
   );
