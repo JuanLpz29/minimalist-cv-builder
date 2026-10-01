@@ -31,7 +31,7 @@ export function MinimalTemplate({ cv }: { cv: CV }) {
             </div>
           )}
           <div className="mt-3">
-            <ContactLine bits={contactBits} />
+            <ContactLine bits={contactBits} color={appearance.contactColor} />
           </div>
         </div>
       </header>

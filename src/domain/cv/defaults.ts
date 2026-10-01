@@ -53,9 +53,9 @@ export const defaultAppearance = (): Appearance => ({
   font: "Inter",
   fontSize: 11,
   spacing: 1.5,
-  accentColor: defaultColors.accent,
   nameColor: defaultColors.name,
   titleColor: defaultColors.title,
+  contactColor: "#737373",
   /** Alineado al CV de referencia (~20 mm en A4) */
   margin: 20,
   atsMode: false,
@@ -67,13 +67,11 @@ export function appearanceForTemplate(template: TemplateId, base?: Appearance): 
   if (template === "classic") {
     return {
       ...a,
-      accentColor: a.accentColor === "#111111" ? "#3B7A8A" : a.accentColor,
       nameColor: a.nameColor === "#111111" ? "#3B7A8A" : a.nameColor,
     };
   }
   return {
     ...a,
-    accentColor: a.accentColor === "#3B7A8A" ? "#111111" : a.accentColor,
     nameColor: a.nameColor === "#3B7A8A" ? "#111111" : a.nameColor,
   };
 }
@@ -498,7 +496,6 @@ export function migrateCV(raw: unknown): CV {
     appearance: {
       ...defaultAppearance(),
       ...legacy.appearance,
-      accentColor: accent,
       nameColor: (legacy.appearance as Appearance | undefined)?.nameColor || accent,
       titleColor: (legacy.appearance as Appearance | undefined)?.titleColor || defaultColors.title,
       atsMode: Boolean((legacy.appearance as Appearance | undefined)?.atsMode),

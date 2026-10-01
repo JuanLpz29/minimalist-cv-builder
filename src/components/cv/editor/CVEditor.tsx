@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import type { CV, CVSection, Locale, SectionEntry, SectionKind } from "@/domain/cv/types";
 import { FONT_FAMILIES } from "@/domain/cv/types";
 import { appearanceForTemplate, newEntry, newSection, switchLocale } from "@/domain/cv/defaults";
@@ -128,13 +129,30 @@ function ColorField({
   );
 }
 
-function readImage(file: File): Promise<string> {
+function readFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
   });
+}
+
+// Todo se guarda en localStorage (~5 MB por sitio): una foto de celular sin achicar lo llena sola.
+const PHOTO_MAX_PX = 480;
+const FONT_MAX_BYTES = 1024 * 1024;
+
+async function readPhoto(file: File): Promise<string> {
+  const src = await readFile(file);
+  const img = new Image();
+  img.src = src;
+  await img.decode();
+  const scale = Math.min(1, PHOTO_MAX_PX / Math.max(img.width, img.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.85);
 }
 
 function patchSection(sections: CVSection[], id: string, patch: Partial<CVSection>): CVSection[] {
@@ -274,6 +292,7 @@ function BodyFormatEditor({
 export function CVEditor({ cv, update }: Props) {
   const [dragId, setDragId] = useState<string | null>(null);
   const photoRef = useRef<HTMLInputElement>(null);
+  const fontRef = useRef<HTMLInputElement>(null);
 
   const setSections = (sections: CVSection[]) => update((p) => ({ ...p, sections }));
   const setPersonal = (key: keyof CV["personal"]) => (v: string) =>
@@ -338,7 +357,7 @@ export function CVEditor({ cv, update }: Props) {
               onChange={async (e) => {
                 const f = e.target.files?.[0];
                 if (!f) return;
-                const dataUrl = await readImage(f);
+                const dataUrl = await readPhoto(f);
                 update((p) => ({ ...p, personal: { ...p.personal, photoDataUrl: dataUrl } }));
               }}
             />
@@ -686,16 +705,60 @@ export function CVEditor({ cv, update }: Props) {
                       {f}
                     </SelectItem>
                   ))}
+                  {cv.appearance.customFont && (
+                    <SelectItem value="custom">{cv.appearance.customFont.name} (tuya)</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
+              <input
+                ref={fontRef}
+                type="file"
+                accept=".ttf,.otf,.woff,.woff2"
+                className="hidden"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!f) return;
+                  if (f.size > FONT_MAX_BYTES) {
+                    toast.error("La fuente pesa más de 1 MB. Prueba con la versión .woff2.");
+                    return;
+                  }
+                  const dataUrl = await readFile(f);
+                  const name = f.name.replace(/\.(ttf|otf|woff2?)$/i, "");
+                  update((p) => ({
+                    ...p,
+                    appearance: { ...p.appearance, font: "custom", customFont: { name, dataUrl } },
+                  }));
+                }}
+              />
+              <div className="flex gap-3 text-xs text-neutral-500">
+                <button
+                  type="button"
+                  className="min-h-10 underline"
+                  onClick={() => fontRef.current?.click()}
+                >
+                  Subir mi fuente (.ttf, .otf, .woff2)
+                </button>
+                {cv.appearance.customFont && (
+                  <button
+                    type="button"
+                    className="min-h-10 underline"
+                    onClick={() =>
+                      update((p) => ({
+                        ...p,
+                        appearance: {
+                          ...p.appearance,
+                          font: p.appearance.font === "custom" ? "Inter" : p.appearance.font,
+                          customFont: undefined,
+                        },
+                      }))
+                    }
+                  >
+                    Quitar
+                  </button>
+                )}
+              </div>
             </div>
-            <ColorField
-              label="Color de acento"
-              value={cv.appearance.accentColor}
-              onChange={(v) =>
-                update((p) => ({ ...p, appearance: { ...p.appearance, accentColor: v } }))
-              }
-            />
             <ColorField
               label="Color del nombre"
               value={cv.appearance.nameColor}
@@ -708,6 +771,13 @@ export function CVEditor({ cv, update }: Props) {
               value={cv.appearance.titleColor}
               onChange={(v) =>
                 update((p) => ({ ...p, appearance: { ...p.appearance, titleColor: v } }))
+              }
+            />
+            <ColorField
+              label="Color de contacto y enlaces"
+              value={cv.appearance.contactColor}
+              onChange={(v) =>
+                update((p) => ({ ...p, appearance: { ...p.appearance, contactColor: v } }))
               }
             />
           </div>

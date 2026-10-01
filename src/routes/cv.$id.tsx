@@ -27,7 +27,7 @@ const A4_WIDTH_PX = 794;
 function EditorPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { cv, update, loading, saving, undo, redo, canUndo, canRedo } = useCV(id);
+  const { cv, update, loading, saving, saveFailed, undo, redo, canUndo, canRedo } = useCV(id);
   const [zoom, setZoom] = useState(0.7);
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const [previewScale, setPreviewScale] = useState(0.7);
@@ -106,6 +106,8 @@ function EditorPage() {
         <div className="hidden items-center gap-1 text-xs text-neutral-400 sm:flex">
           {saving ? (
             <span>Guardando…</span>
+          ) : saveFailed ? (
+            <span className="font-medium text-red-600">Sin guardar</span>
           ) : (
             <span className="flex items-center gap-1">
               <Check className="h-3 w-3" /> Guardado

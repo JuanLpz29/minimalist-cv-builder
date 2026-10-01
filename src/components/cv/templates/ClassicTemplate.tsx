@@ -7,7 +7,7 @@ import { ContactLine, PageShell, Photo, SectionBody } from "./shared";
  */
 export function ClassicTemplate({ cv }: { cv: CV }) {
   const { personal, sections, appearance } = cv;
-  const accent = appearance.nameColor || appearance.accentColor || "#3B7A8A";
+  const accent = appearance.nameColor || "#3B7A8A";
   const contactBits = [
     personal.city,
     personal.email,
@@ -35,7 +35,7 @@ export function ClassicTemplate({ cv }: { cv: CV }) {
             </div>
           )}
           <div className="mt-3 mb-2.5 h-px w-full" style={{ backgroundColor: accent }} />
-          <ContactLine bits={contactBits} />
+          <ContactLine bits={contactBits} color={appearance.contactColor} />
         </div>
       </header>
 
