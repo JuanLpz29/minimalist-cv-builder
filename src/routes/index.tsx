@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { DonateCard } from "@/components/DonateLink";
+import { DonateCard } from "@/components/DonateCard";
 
 export const Route = createFileRoute("/")({ component: Dashboard });
 
